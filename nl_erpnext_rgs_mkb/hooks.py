@@ -23,10 +23,11 @@ doc_events = {
 boot_session = "nl_erpnext_rgs_mkb.utils.boot_session"
 
 # Fixtures - Standard Frappe way for custom fields and data
+# Temporarily disabled for migration
 fixtures = [
-    "Custom Field",
-    {
-        "doctype": "RGS Classification", 
-        "filters": {"rgs_status": "A"}
-    }
+    "Custom Field"
+    # {
+    #     "doctype": "RGS Classification", 
+    #     "filters": {"rgs_status": "A"}
+    # }
 ]
