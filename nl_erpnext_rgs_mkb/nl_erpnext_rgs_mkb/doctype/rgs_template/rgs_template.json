@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:template_name",
+ "creation": "2025-08-21 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "entity_type", 
+  "description",
+  "column_break_1",
+  "is_active",
+  "max_nivo",
+  "include_detail_level",
+  "section_break_1",
+  "rgs_codes",
+  "section_break_2",
+  "generation_rules",
+  "section_break_3",
+  "usage_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "entity_type",
+   "fieldtype": "Select",
+   "label": "Entity Type",
+   "options": "ZZP\nEZ\nBV\nSVC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": 1
+  },
+  {
+   "fieldname": "max_nivo",
+   "fieldtype": "Int",
+   "label": "Maximum Nivo Level",
+   "default": 5
+  },
+  {
+   "fieldname": "include_detail_level",
+   "fieldtype": "Int",
+   "label": "Include Detail Level",
+   "default": 5
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "RGS Codes"
+  },
+  {
+   "fieldname": "rgs_codes",
+   "fieldtype": "Table",
+   "label": "RGS Codes",
+   "options": "RGS Template Item"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Generation Rules"
+  },
+  {
+   "fieldname": "generation_rules",
+   "fieldtype": "Code",
+   "label": "Generation Rules (JSON)",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Usage"
+  },
+  {
+   "fieldname": "usage_notes",
+   "fieldtype": "Text Editor",
+   "label": "Usage Notes"
+  }
+ ],
+ "icon": "fa fa-list-alt",
+ "idx": 0,
+ "links": [],
+ "modified": "2025-08-21 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Dutch RGS MKB",
+ "name": "RGS Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:rgs_code",
+ "creation": "2025-08-21 10:00:00.000000",
+ "default_view": "Tree",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rgs_code",
+  "rgs_description", 
+  "rgs_description_en",
+  "column_break_1",
+  "rgs_nivo",
+  "parent_rgs_classification",
+  "is_group",
+  "section_break_2",
+  "rgs_status",
+  "rgs_version",
+  "column_break_2",
+  "account_type",
+  "balance_must_be",
+  "section_break_3",
+  "rgs_branch",
+  "rgs_reference_number",
+  "column_break_3",
+  "applicable_zzp",
+  "applicable_ez",
+  "applicable_bv",
+  "applicable_svc"
+ ],
+ "fields": [
+  {
+   "fieldname": "rgs_code",
+   "fieldtype": "Data",
+   "label": "RGS Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "rgs_description",
+   "fieldtype": "Data",
+   "label": "Description (Dutch)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rgs_description_en",
+   "fieldtype": "Data",
+   "label": "Description (English)"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rgs_nivo",
+   "fieldtype": "Int",
+   "label": "RGS Nivo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_rgs_classification",
+   "fieldtype": "Link",
+   "label": "Parent RGS Classification",
+   "options": "RGS Classification"
+  },
+  {
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "RGS Details"
+  },
+  {
+   "fieldname": "rgs_status",
+   "fieldtype": "Select",
+   "label": "RGS Status",
+   "options": "A\nP\nV",
+   "default": "A"
+  },
+  {
+   "fieldname": "rgs_version",
+   "fieldtype": "Data",
+   "label": "RGS Version"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Select",
+   "label": "Account Type",
+   "options": "Asset\nLiability\nEquity\nIncome\nExpense"
+  },
+  {
+   "fieldname": "balance_must_be",
+   "fieldtype": "Select",
+   "label": "Balance Must Be",
+   "options": "\nDebit\nCredit"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Entity Applicability"
+  },
+  {
+   "fieldname": "rgs_branch",
+   "fieldtype": "Int",
+   "label": "RGS Branch"
+  },
+  {
+   "fieldname": "rgs_reference_number",
+   "fieldtype": "Data",
+   "label": "RGS Reference Number"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicable_zzp",
+   "fieldtype": "Select",
+   "label": "Applicable for ZZP",
+   "options": "\nJ\nP\nN"
+  },
+  {
+   "fieldname": "applicable_ez",
+   "fieldtype": "Select",
+   "label": "Applicable for EZ",
+   "options": "\nJ\nP\nN"
+  },
+  {
+   "fieldname": "applicable_bv",
+   "fieldtype": "Select", 
+   "label": "Applicable for BV",
+   "options": "\nJ\nP\nN"
+  },
+  {
+   "fieldname": "applicable_svc",
+   "fieldtype": "Select",
+   "label": "Applicable for SVC",
+   "options": "\nJ\nP\nN"
+  }
+ ],
+ "icon": "fa fa-sitemap",
+ "idx": 0,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2025-08-21 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Dutch RGS MKB",
+ "name": "RGS Classification",
+ "nsm_parent_field": "parent_rgs_classification",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "tree_root_label": "All RGS Classifications"
+}
