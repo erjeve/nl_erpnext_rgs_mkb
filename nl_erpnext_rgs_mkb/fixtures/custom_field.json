@@ -1,0 +1,70 @@
+[
+    {
+        "doctype": "Custom Field",
+        "dt": "Account",
+        "fieldname": "rgs_section",
+        "label": "RGS Information",
+        "fieldtype": "Section Break",
+        "insert_after": "account_type",
+        "collapsible": 1,
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    },
+    {
+        "doctype": "Custom Field",
+        "dt": "Account", 
+        "fieldname": "rgs_code",
+        "label": "RGS Code",
+        "fieldtype": "Data",
+        "insert_after": "rgs_section",
+        "read_only": 1,
+        "description": "Reference Classification System code for Dutch financial reporting",
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    },
+    {
+        "doctype": "Custom Field",
+        "dt": "Account",
+        "fieldname": "rgs_nivo", 
+        "label": "RGS Nivo",
+        "fieldtype": "Int",
+        "insert_after": "rgs_code",
+        "read_only": 1,
+        "description": "RGS hierarchy level (2-5)",
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    },
+    {
+        "doctype": "Custom Field",
+        "dt": "Account",
+        "fieldname": "rgs_omslagcode",
+        "label": "RGS Omslagcode", 
+        "fieldtype": "Data",
+        "insert_after": "rgs_nivo",
+        "read_only": 1,
+        "description": "RGS code for linking debit and credit accounts",
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    },
+    {
+        "doctype": "Custom Field",
+        "dt": "Account",
+        "fieldname": "column_break_rgs",
+        "fieldtype": "Column Break", 
+        "insert_after": "rgs_omslagcode",
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    },
+    {
+        "doctype": "Custom Field",
+        "dt": "Account",
+        "fieldname": "rgs_referentienummer",
+        "label": "RGS Referentienummer",
+        "fieldtype": "Data",
+        "insert_after": "column_break_rgs", 
+        "read_only": 1,
+        "description": "RGS reference number for official reporting",
+        "docstatus": 0,
+        "modified": "2025-08-21 10:00:00.000000"
+    }
+]

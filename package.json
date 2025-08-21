@@ -1,0 +1,16 @@
+{
+  "name": "nl_erpnext_rgs_mkb",
+  "description": "Dutch RGS MKB 3.7 compliance for ERPNext",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erjeve/nl_erpnext_rgs_mkb.git"
+  },
+  "homepage": "https://github.com/erjeve/nl_erpnext_rgs_mkb",
+  "author": "Your Organization",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/erjeve/nl_erpnext_rgs_mkb/issues"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
