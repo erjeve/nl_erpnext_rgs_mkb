@@ -153,7 +153,7 @@
  "links": [],
  "modified": "2025-08-21 10:00:00.000000",
  "modified_by": "Administrator",
- "module": "Dutch RGS MKB",
+ "module": "nl_erpnext_rgs_mkb",
  "name": "RGS Classification",
  "nsm_parent_field": "parent_rgs_classification",
  "owner": "Administrator",
