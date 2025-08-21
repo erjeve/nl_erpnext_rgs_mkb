@@ -8,10 +8,7 @@ name = "nl_erpnext_rgs_mkb"
 authors = [{name = "Your Organization", email = "admin@fivi.eu"}]
 dynamic = ["version", "description"]
 readme = "README.md"
-dependencies = [
-    "frappe",
-    "erpnext"
-]
+dependencies = []
 
 [project.urls]
 Home = "https://github.com/erjeve/nl_erpnext_rgs_mkb"
