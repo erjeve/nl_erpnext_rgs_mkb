@@ -1,6 +1,7 @@
 [
     {
         "doctype": "Custom Field",
+        "name": "Account-rgs_section",
         "dt": "Account",
         "fieldname": "rgs_section",
         "label": "RGS Information",
@@ -12,7 +13,8 @@
     },
     {
         "doctype": "Custom Field",
-        "dt": "Account", 
+        "name": "Account-rgs_code",
+        "dt": "Account",
         "fieldname": "rgs_code",
         "label": "RGS Code",
         "fieldtype": "Data",
@@ -24,8 +26,9 @@
     },
     {
         "doctype": "Custom Field",
+        "name": "Account-rgs_nivo",
         "dt": "Account",
-        "fieldname": "rgs_nivo", 
+        "fieldname": "rgs_nivo",
         "label": "RGS Nivo",
         "fieldtype": "Int",
         "insert_after": "rgs_code",
@@ -36,32 +39,35 @@
     },
     {
         "doctype": "Custom Field",
+        "name": "Account-rgs_omslagcode",
         "dt": "Account",
         "fieldname": "rgs_omslagcode",
-        "label": "RGS Omslagcode", 
+        "label": "RGS Omslagcode",
         "fieldtype": "Data",
         "insert_after": "rgs_nivo",
         "read_only": 1,
-        "description": "RGS code for linking debit and credit accounts",
+        "description": "RGS code for lower-level mapping",
         "docstatus": 0,
         "modified": "2025-08-21 10:00:00.000000"
     },
     {
         "doctype": "Custom Field",
+        "name": "Account-column_break_rgs",
         "dt": "Account",
         "fieldname": "column_break_rgs",
-        "fieldtype": "Column Break", 
+        "fieldtype": "Column Break",
         "insert_after": "rgs_omslagcode",
         "docstatus": 0,
         "modified": "2025-08-21 10:00:00.000000"
     },
     {
         "doctype": "Custom Field",
+        "name": "Account-rgs_referentienummer",
         "dt": "Account",
         "fieldname": "rgs_referentienummer",
         "label": "RGS Referentienummer",
         "fieldtype": "Data",
-        "insert_after": "column_break_rgs", 
+        "insert_after": "column_break_rgs",
         "read_only": 1,
         "description": "RGS reference number for official reporting",
         "docstatus": 0,
