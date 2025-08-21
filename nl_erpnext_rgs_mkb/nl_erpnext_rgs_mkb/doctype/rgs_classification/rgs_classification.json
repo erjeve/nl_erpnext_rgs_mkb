@@ -15,8 +15,6 @@
   "rgs_nivo",
   "parent_rgs_classification",
   "is_group",
-  "lft",
-  "rgt",
   "section_break_2",
   "rgs_status",
   "rgs_version",
@@ -71,20 +69,6 @@
    "fieldname": "is_group",
    "fieldtype": "Check",
    "label": "Is Group"
-  },
-  {
-   "fieldname": "lft",
-   "fieldtype": "Int",
-   "label": "Left",
-   "read_only": 1,
-   "hidden": 1
-  },
-  {
-   "fieldname": "rgt",
-   "fieldtype": "Int",
-   "label": "Right", 
-   "read_only": 1,
-   "hidden": 1
   },
   {
    "fieldname": "section_break_2",
