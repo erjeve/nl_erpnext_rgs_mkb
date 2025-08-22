@@ -5,17 +5,334 @@
 **Purpose:** ERPNext app for Dutch RGS 3.7+ compliance and Chart of Accounts management with forward compatibility
 
 ## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Development Workflow](#development-workflow)
-3. [RGS System Architecture](#rgs-system-architecture)
-4. [Core Concept](#core-concept)
-5. [Data Architecture](#data-architecture)
-6. [User Experience](#user-experience)
-7. [Technical Implementation](#technical-implementation)
-8. [Modern Frappe Framework Integration](#modern-frappe-framework-integration)
-9. [Business Value](#business-value)
-10. [Development Phases](#development-phases)
-11. [Success Criteria](#success-criteria)
+1. [AI Development Kickstart Guide](#ai-development-kickstart-guide)
+2. [Project Overview](#project-overview)
+3. [Development Workflow](#development-workflow)
+4. [RGS System Architecture](#rgs-system-architecture)
+5. [Core Concept](#core-concept)
+6. [Data Architecture](#data-architecture)
+7. [User Experience](#user-experience)
+8. [Technical Implementation](#technical-implementation)
+9. [Modern Frappe Framework Integration](#modern-frappe-framework-integration)
+10. [Business Value](#business-value)
+11. [Development Phases](#development-phases)
+12. [Success Criteria](#success-criteria)
+
+---
+
+## AI Development Kickstart Guide
+
+### Context Setting for AI Assistant
+
+You are an expert AI programming assistant specializing in **Dutch RGS MKB compliance** for ERPNext. Your primary mission is to develop a production-ready Frappe app that enables Dutch SMEs to achieve legal compliance with RGS (Referentiegrootboekschema) 3.7+ standards.
+
+#### Critical Understanding Requirements
+
+**1. Dutch Legal Context:**
+- RGS is **mandatory** for Dutch financial reporting
+- RGS MKB is the SME subset from ~5,000 RGS account codes
+- Legal compliance is non-negotiable - accuracy is paramount
+- Account classification directly impacts tax and legal reporting
+
+**2. RGS Data Structure (MEMORIZE THIS):**
+```
+PRIMARY KEY: rgsCode (official classification, hierarchical)
+- Examples: "B", "BIva", "BIvaKou", "WAkfAkf"
+- Used for: Official classification, parent-child relationships
+- When the rgsCode starts with "B" it is a balance account
+- When the rgsCode starts with "W" it is a profit and loss account
+- Hierarchy: indicated by 3-letter-acroniem-based groups (B→BIva→BIvaKou→BIvaKouOnd) 
+- Each new level added to the hierarchical code starts with a capital
+
+USER IDENTIFIERS: rgsReknr + rgsOmskort (SME-friendly)
+- rgsReknr: "01000", "10101", "45105" (5-digit decimal, stable forever)
+- rgsOmskort: "Bank lopende rekening", "Kas" (Dutch account names)
+- Used for: ERPNext account_number and account_name
+
+CRITICAL: rgsCode = primary key, rgsReknr = user interface
+```
+
+**3. ERPNext Integration Points:**
+- Account DocType: Enhanced with RGS custom fields
+- Chart of Accounts: RGS-compliant templates (ZZP, BV, EZ, SVC)
+- Fixtures: Large dataset (~5,000 records) requiring Redis optimization
+- Hierarchical Structure: Tree-based using rgsCode relationships
+
+### Required Files for Clean Start
+
+#### Essential Repository Files
+```bash
+# Core app structure
+/nl_erpnext_rgs_mkb/
+├── __init__.py
+├── hooks.py                    # Frappe app configuration
+├── modules.txt                 # Module definition
+├── setup.py                   # Package setup
+├── requirements.txt            # Python dependencies
+├── package.json               # Node dependencies
+├── pyproject.toml             # Modern Python packaging
+├── RGS_MKB_DESIGN_SPECIFICATION.md  # THIS DOCUMENT (critical!)
+└── nl_erpnext_rgs_mkb/
+    ├── __init__.py
+    ├── account_validation.py   # RGS compliance validation
+    ├── utils.py                # Helper functions
+    ├── config/
+    │   └── desktop.py          # Dashboard integration
+    ├── fixtures/
+    │   ├── custom_field.json   # ERPNext Account enhancements
+    │   └── rgs_classification.json  # RGS master data (large!)
+    ├── doctype/
+    │   ├── rgs_classification/
+    │   │   ├── rgs_classification.json
+    │   │   ├── rgs_classification.py
+    │   │   └── rgs_classification.js
+    │   └── rgs_template/
+    │       ├── rgs_template.json
+    │       ├── rgs_template.py
+    │       └── rgs_template.js
+    └── public/
+        ├── css/app.css
+        └── js/index.js
+```
+
+#### Critical Data Files
+```bash
+# RGS master data (external, required for processing)
+/rgs_data/
+├── rgsmkb_all4EN.json        # Canonical RGS MKB 3.7 dataset (~33,560 lines)
+├── attributes.csv            # Official field explanation and mapping proposal
+├── 20210913 RGS NL en EN labels.csv  # Official translation/concept mappings
+├── rgs-definitions.json      # rgs accounts (derived from rgsmkb_all4EN.json)
+├── export_zzp_standard.json  # ZZP template (derived from rgsmkb_all4EN.json)
+├── export_bv_standard.json   # BV template  (derived from rgsmkb_all4EN.json) 
+├── export_ez_standard.json   # EZ template  (derived from rgsmkb_all4EN.json) 
+└── export_svc_standard.json  # SVC template (derived from rgsmkb_all4EN.json) 
+```
+
+### AI Task Specialization
+
+#### Primary Competencies Required
+1. **Frappe Framework Expertise** (Version 15+)
+   - DocType creation and relationships
+   - Custom field integration
+   - Fixture loading and optimization
+   - Tree DocType hierarchies
+   - Modern framework patterns
+
+2. **Dutch Accounting Knowledge**
+   - RGS classification system understanding
+   - correct mapping of RGS accounts to ERPNEXT's root_type, account_type
+   - SME legal requirements (ZZP, BV, EZ, SVC)
+   - Dutch GAAP compliance
+   - Multi-member entity accounting (cooperatives, VOF)
+
+3. **ERPNext Integration**
+   - Chart of Accounts customization
+   - Account DocType enhancement
+   - Template creation and management
+   - Financial reporting compliance
+
+4. **Performance Optimization**
+   - Large dataset handling (5,000+ records)
+   - Redis cache optimization
+   - Docker deployment efficiency
+   - Database performance tuning
+
+### Development Environment Setup
+
+#### Quick Start Commands
+```bash
+# 1. Repository setup
+git clone https://github.com/erjeve/nl_erpnext_rgs_mkb.git
+cd nl_erpnext_rgs_mkb
+
+# 2. Read the design specification FIRST
+cat RGS_MKB_DESIGN_SPECIFICATION.md  # CRITICAL - contains all context
+
+# 3. Understand the data structure
+head -50 /rgs_data/attributes.csv     # Official field mappings
+head -20 /rgs_data/rgsmkb_all4EN.json # Sample RGS data
+
+# 4. Frappe app setup (if using bench)
+bench get-app https://github.com/erjeve/nl_erpnext_rgs_mkb.git
+bench install-app nl_erpnext_rgs_mkb --site your-site
+
+# 5. Docker setup (production-style)
+# Add to apps.json in frappe_docker
+# Build with: docker buildx bake custom --set custom.args.APPS_JSON_BASE64=$(base64 -w 0 apps.json)
+```
+
+### Critical Implementation Guidelines
+
+#### 1. Data Structure Principles
+```python
+# ALWAYS remember the hierarchy
+def find_parent_rgs_code(rgs_code):
+    """
+    rgsCode hierarchy: B → BIva → BIvaKou → BIvaKouOnd
+    Parent is found by removing last 3-character group
+    """
+    if len(rgs_code) <= 1 or rgs_code in ['B', 'W']:
+        return None  # Root level
+    
+    # Remove last 3-character segment for parent
+    if len(rgs_code) <= 4:
+        return rgs_code[0]  # Return B or W
+    else:
+        return rgs_code[:-3]  # Remove last group
+
+# ALWAYS use rgsCode as primary key
+doctype_definition = {
+    "name": rgs_code,  # PRIMARY KEY
+    "account_number": rgs_reknr,  # User interface
+    "account_name": rgs_omskort,  # User interface
+    "parent_rgs_classification": parent_rgs_code  # Hierarchy
+}
+```
+
+#### 2. Performance Optimization Patterns
+```python
+# Large fixture loading with Redis optimization
+def optimize_for_large_datasets():
+    """
+    CRITICAL: 5,000+ RGS records require special handling
+    """
+    import frappe
+    
+    # Pre-warm Redis cache
+    redis_client = frappe.cache()
+    redis_client.config_set('maxmemory-policy', 'allkeys-lru')
+    
+    # Batch processing (max 500 records per batch)
+    batch_size = 500
+    
+    # Clear cache periodically during import
+    if record_count % 2000 == 0:
+        frappe.clear_cache()
+```
+
+#### 3. Legal Compliance Validation
+```python
+# NEVER compromise on RGS compliance
+def validate_rgs_compliance(account_doc):
+    """
+    Mandatory validation for Dutch legal compliance
+    """
+    # Ensure RGS classification exists
+    if not account_doc.rgs_classification:
+        frappe.throw("RGS classification is mandatory for Dutch entities")
+    
+    # Validate account number format
+    if not re.match(r'^\d{5}$', account_doc.account_number):
+        frappe.throw("Account number must be 5-digit RGS format")
+    
+    # Ensure hierarchy compliance
+    validate_parent_child_relationship(account_doc)
+```
+
+### Common Pitfalls to Avoid
+
+#### 1. **WRONG: Using rgsReknr as primary key**
+```python
+# DON'T DO THIS
+naming_rule: "rgsReknr"  # Wrong - this is for user interface only
+```
+
+#### 2. **WRONG: Mixing up hierarchy references**
+```python
+# DON'T DO THIS
+parent_rgs_classification: rgs_reknr  # Wrong - use rgsCode for hierarchy
+```
+
+#### 3. **WRONG: Ignoring performance optimization**
+```python
+# DON'T DO THIS - will cause memory overflow
+for record in all_5000_rgs_records:
+    frappe.get_doc("RGS Classification", record).insert()
+```
+
+### Debugging and Troubleshooting
+
+#### Common Issues and Solutions
+```bash
+# 1. Fixture loading fails
+Error: "Memory exceeded during fixture import"
+Solution: Implement batch processing + Redis optimization
+
+# 2. Hierarchy not working
+Error: "Parent account not found"
+Solution: Check rgsCode hierarchy logic, ensure parents created first
+
+# 3. Docker build fails
+Error: "App not found in container"
+Solution: Verify apps.json path and base64 encoding
+
+# 4. Account validation errors
+Error: "RGS compliance validation failed"
+Solution: Check custom field mapping from attributes.csv
+```
+
+### AI Decision Making Framework
+
+#### When Implementing Features:
+1. **Legal compliance FIRST** - always check Dutch requirements
+2. **Performance SECOND** - consider 5,000+ record implications  
+3. **User experience THIRD** - SME-friendly interfaces
+4. **Future compatibility FOURTH** - RGS 3.8+ preparation
+
+#### Priority Matrix:
+```
+HIGH PRIORITY:
+- RGS compliance accuracy
+- Data integrity 
+- Performance with large datasets
+- Legal audit trail
+
+MEDIUM PRIORITY:
+- User interface enhancements
+- Template customization
+- Multi-member accounting
+- Reporting features
+
+LOW PRIORITY:
+- Advanced visualizations
+- Non-essential integrations
+- Experimental features
+```
+
+### Success Criteria for AI
+
+Your implementation is successful when:
+1. ✅ All 5,000+ RGS codes load without memory issues
+2. ✅ Account hierarchy displays correctly (B→BIva→BIvaKou)
+3. ✅ Dutch SME can create legally compliant Chart of Accounts
+4. ✅ Templates work for all entity types (ZZP, BV, EZ, SVC)
+5. ✅ Performance remains acceptable with full dataset
+6. ✅ Compliance validation prevents legal errors
+7. ✅ Multi-member accounting works for cooperatives/VOF
+
+### Resource References
+
+#### Documentation Priority:
+1. **THIS DOCUMENT** - Complete specification and context
+2. **attributes.csv** - Authoritative field mappings  
+3. **Frappe Documentation** - Framework patterns
+4. **ERPNext Accounting** - Integration points
+5. **Dutch RGS Standards** - Legal requirements
+
+#### Code Patterns:
+```python
+# Study existing implementations in:
+- /nl_erpnext_rgs_mkb/doctype/rgs_classification/
+- /nl_erpnext_rgs_mkb/account_validation.py
+- /nl_erpnext_rgs_mkb/fixtures/
+
+# Follow established patterns for:
+- DocType relationships
+- Custom field integration  
+- Fixture loading optimization
+- Validation implementation
+```
 
 ---
 
@@ -76,20 +393,65 @@ git push origin main
 
 #### 3. Deployment Pipeline
 ```bash
-# Copy to production Docker stack
+# GitHub-based deployment workflow
+
+# 1. Development and push to GitHub
+cd /tmp/nl_erpnext_rgs_mkb
+git add -A
+git commit -m "Feature: Description"
+git push origin main
+
+# 2. Update apps.json with GitHub URL (production deployment)
 cd /opt/frappe_docker
-cp -r /tmp/nl_erpnext_rgs_mkb .
+cat > apps.json << EOF
+[
+  {
+    "url": "https://github.com/frappe/erpnext",
+    "branch": "version-15"
+  },
+  {
+    "url": "https://github.com/erjeve/nl_erpnext_rgs_mkb",
+    "branch": "main"
+  }
+]
+EOF
 
-# Update apps.json for Docker build
-vim apps.json  # Add local path reference
-
-# Build and deploy
+# 3. Build from GitHub source
 base64 -w 0 apps.json
 docker buildx bake custom --no-cache --set custom.args.APPS_JSON_BASE64=$(base64 -w 0 apps.json)
 
-# Deploy with profile
+# 4. Deploy with profile
 docker compose down
 docker compose --profile rgs up -d
+```
+
+#### Development vs Production Apps.json
+```bash
+# Development (local path for rapid iteration)
+apps_dev.json:
+[
+  {
+    "url": "https://github.com/frappe/erpnext",
+    "branch": "version-15"
+  },
+  {
+    "url": "/tmp/nl_erpnext_rgs_mkb",
+    "branch": "main"
+  }
+]
+
+# Production (GitHub URL for stable deployment)
+apps.json:
+[
+  {
+    "url": "https://github.com/frappe/erpnext", 
+    "branch": "version-15"
+  },
+  {
+    "url": "https://github.com/erjeve/nl_erpnext_rgs_mkb",
+    "branch": "main"
+  }
+]
 ```
 
 ### Production Stack Integration
@@ -1986,15 +2348,25 @@ Tree Structure Example:
 
 **Challenge: Custom App Building in Docker**
 ```bash
-# FAILED APPROACH: Direct path references
+# OBSOLETE APPROACH: Direct local path references (development only)
 docker buildx bake custom --set custom.args.APPS_JSON_BASE64=...
 
-# ROOT CAUSE: Apps outside Docker build context cannot be referenced directly
-# SOLUTION: Copy to build context first
-cd /opt/frappe_docker && cp -r /tmp/nl_erpnext_rgs_mkb .
+# ROOT CAUSE: Local paths should only be used for rapid development iteration
+# PRODUCTION SOLUTION: Use GitHub URLs in apps.json for stable deployment
+# apps.json with GitHub URL:
+[
+  {
+    "url": "https://github.com/frappe/erpnext",
+    "branch": "version-15"
+  },
+  {
+    "url": "https://github.com/erjeve/nl_erpnext_rgs_mkb",
+    "branch": "main"
+  }
+]
 ```
 
-**Lesson**: Always ensure custom apps are within Docker build context before building.
+**Lesson**: Production builds should always use GitHub URLs for reproducibility and version control.
 
 **Challenge: Profile-Based Deployment**
 ```bash
