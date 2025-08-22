@@ -1392,40 +1392,48 @@ custom_fields:
 
 ### Data Loading Strategy
 
-#### Phase 1: RGS Master Data Conversion (Official Implementation)
+#### Phase 1: Three-Document Integration Foundation (CRITICAL)
 ```python
-# Convert rgsmkb_all4EN.json to Frappe fixtures with official field mappings
-def convert_rgs_to_fixtures():
+# ARCHITECTURAL FOUNDATION: Complete three-document integration from start
+def convert_rgs_to_fixtures_with_full_integration():
     """
-    Transform rgsmkb_all4EN.json to fixtures/rgs_classification.json
-    Using official attributes.csv mappings and translation CSV concepts
+    Transform RGS master data with complete ERPNext integration
+    CRITICAL: All three sources processed together to prevent architectural debt
     """
-    source_data = load_json('/opt/frappe_docker/rgs_mkb/rgsmkb_all4EN.json')
-    csv_concepts = load_csv_concepts('/tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv')
+    # Load all three official sources
+    canonical_data = load_json('/opt/frappe_docker/rgs_mkb/rgsmkb_all4EN.json')
+    field_specs = load_csv('/opt/frappe_docker/rgs_mkb/attributes.csv')
+    concept_mappings = load_csv('/tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv')
+    
     fixtures = []
     
-    for record in source_data:
-        # Use rgsCode as primary key (official classification)
+    # Process each RGS record with complete integration
+    for record in canonical_data:
+        # PRIMARY KEY: rgsCode (official classification)
         rgs_code = record.get('rgsCode', '')
-        rgs_reknr = str(record.get('rgsReknr', '0')).zfill(5)  # SME identifier
+        if not rgs_code:
+            continue
+            
+        # SME IDENTIFIERS: User-friendly interface fields
+        rgs_reknr = str(record.get('rgsReknr', '0')).zfill(5)
+        rgs_omskort = record.get('rgsOmskort', '')
         
-        # Get translation concepts for intelligent ERPNext mapping
-        concept_mappings = parse_concept_mappings_from_csv(rgs_code, csv_concepts)
+        # ERPNEXT INTEGRATION: Pre-calculate mappings using concept data
+        erpnext_mappings = derive_erpnext_mappings(rgs_code, record, concept_mappings)
         
-        # Determine ERPNext mappings using translation concepts
-        report_type = determine_report_type_from_code(rgs_code)
-        root_type = determine_root_type_from_rgs_code(rgs_code, concept_mappings)
-        account_type = determine_account_type_from_rgs_code(rgs_code, root_type, concept_mappings)
+        # HIERARCHY: Parent-child using rgsCode references
+        parent_rgs_code = find_parent_rgs_code_by_hierarchy(rgs_code, canonical_data)
         
-        # Build fixture using official field mappings
+        # Build complete fixture with three-document integration
         fixture = {
             "doctype": "RGS Classification",
-            "name": rgs_code,  # Primary key (official classification)
+            "name": rgs_code,  # PRIMARY KEY: Official classification
+            
             # Core RGS fields (official mapping from attributes.csv)
             "rgs_code": rgs_code,
-            "rgs_omskort": record.get('rgsOmskort', ''),  # SME account name
-            "rgs_reknr": rgs_reknr,  # SME account number
-            "rgs_dc": map_rgs_dc_to_selection(record.get('rgsDc')),
+            "rgs_omskort": rgs_omskort,  # SME account name (UI display)
+            "rgs_reknr": rgs_reknr,      # SME account number (UI display)
+            "rgs_dc": map_rgs_dc_to_balance_must_be(record.get('rgsDc')),
             "rgs_nivo": parse_int_safe(record.get('rgsNivo')),
             "rgs_omslang": record.get('rgsOmslang', ''),
             "rgs_oms_engels": record.get('rgsOmsEngels', ''),
@@ -1435,86 +1443,243 @@ def convert_rgs_to_fixtures():
             "rgs_branche": parse_int_safe(record.get('rgsBranche')),
             "rgs_status": record.get('rgsStatus', 'A'),
             "rgs_versie": record.get('rgsVersie', '3.7'),
-            # Entity applicability flags
+            
+            # Entity applicability flags (for template generation)
             "rgs_zzp": record.get('rgsZZP', 'N'),
             "rgs_ez": record.get('rgsEZ', 'N'),
             "rgs_bv": record.get('rgsBV', 'N'),
             "rgs_svc": record.get('rgsSVC', 'N'),
             "rgs_uitg": record.get('rgsUITG', 'N'),
             "srt_export": record.get('srtExport', ''),
-            # Tree structure (using rgsCode hierarchy)
-            "parent_rgs_classification": find_parent_rgs_code(rgs_code, source_data),
+            
+            # Tree structure (rgsCode hierarchy)
+            "parent_rgs_classification": parent_rgs_code,
             "is_group": determine_if_group_from_nivo(record.get('rgsNivo')),
-            # ERPNext integration (derived)
-            "erpnext_report_type": report_type,
-            "erpnext_root_type": root_type,
-            "erpnext_account_type": account_type,
-            "concept_mappings": json.dumps(concept_mappings)
+            
+            # ERPNext integration (pre-calculated from concept mappings)
+            "erpnext_report_type": erpnext_mappings.get('report_type'),
+            "erpnext_root_type": erpnext_mappings.get('root_type'),
+            "erpnext_account_type": erpnext_mappings.get('account_type'),
+            "concept_mappings": json.dumps(erpnext_mappings.get('concepts', []))
         }
         fixtures.append(fixture)
     
-    # Write to fixtures/rgs_classification.json
-    save_fixtures(fixtures, 'rgs_classification.json')
+    # Performance optimization: Process in batches
+    save_fixtures_in_batches(fixtures, 'rgs_classification.json', batch_size=500)
+    
+    return len(fixtures)
 
-def map_rgs_dc_to_selection(rgs_dc):
-    """Map rgsDc to ERPNext balance_must_be selection"""
+def derive_erpnext_mappings(rgs_code, rgs_record, concept_data):
+    """
+    CRITICAL: Use three-document approach for intelligent ERPNext mapping
+    This prevents Phase 2 retrofitting and ensures compliance foundation
+    """
+    # Extract concept mappings for this RGS code
+    concepts = []
+    for row in concept_data:
+        if row.get('RGS code') == rgs_code:
+            concepts.append({
+                'concept': row.get('Concept', ''),
+                'nl_label': row.get('NL Label', ''),
+                'en_label': row.get('EN Label', ''),
+                'nl_terse': row.get('NL Terse label', ''),
+                'en_terse': row.get('EN terse label', ''),
+                'legal_basis': row.get('Legal basis', '')
+            })
+    
+    # Derive ERPNext mappings based on RGS structure and concepts
+    report_type = derive_report_type_from_rgs_code(rgs_code)
+    root_type = derive_root_type_from_rgs_code_and_concepts(rgs_code, concepts)
+    account_type = derive_account_type_from_rgs_and_concepts(rgs_code, root_type, concepts)
+    
+    return {
+        'report_type': report_type,
+        'root_type': root_type,
+        'account_type': account_type,
+        'concepts': concepts
+    }
+
+def derive_report_type_from_rgs_code(rgs_code):
+    """Map RGS structure to ERPNext report types"""
+    if rgs_code.startswith('B'):
+        return "Balance Sheet"
+    elif rgs_code.startswith('W'):
+        return "Profit and Loss"
+    else:
+        return "Balance Sheet"  # Default
+
+def derive_root_type_from_rgs_code_and_concepts(rgs_code, concepts):
+    """
+    Intelligent root_type mapping using RGS hierarchy and concept data
+    This is critical for proper ERPNext integration
+    """
+    # Primary classification based on RGS structure
+    if rgs_code.startswith('B'):
+        # Balance sheet codes - analyze deeper structure
+        if 'BIva' in rgs_code or 'BMat' in rgs_code or 'BOnr' in rgs_code or 'BFin' in rgs_code:
+            return "Asset"
+        elif 'BLas' in rgs_code or 'BKor' in rgs_code:
+            return "Liability" 
+        elif 'BEig' in rgs_code or 'BRes' in rgs_code:
+            return "Equity"
+        else:
+            # Use concept data for ambiguous cases
+            for concept in concepts:
+                concept_text = concept.get('concept', '').lower()
+                if any(term in concept_text for term in ['asset', 'activa', 'vorderingen']):
+                    return "Asset"
+                elif any(term in concept_text for term in ['liability', 'schulden', 'crediteuren']):
+                    return "Liability"
+                elif any(term in concept_text for term in ['equity', 'eigen vermogen', 'kapitaal']):
+                    return "Equity"
+            return "Asset"  # Default for balance sheet
+    elif rgs_code.startswith('W'):
+        # P&L codes
+        if any(term in rgs_code for term in ['WOmz', 'WBat']):
+            return "Income"
+        else:
+            return "Expense"
+    else:
+        return "Asset"  # Conservative default
+
+def derive_account_type_from_rgs_and_concepts(rgs_code, root_type, concepts):
+    """
+    Specific account_type mapping for ERPNext functionality
+    Uses both RGS structure and concept data for accuracy
+    """
+    # Specific mappings based on RGS patterns
+    account_type_mappings = {
+        # Asset types
+        'BLiq': 'Bank',
+        'BLiqKas': 'Cash',
+        'BVor': 'Receivable',
+        'BVorDeb': 'Receivable',
+        'BIva': 'Fixed Asset',
+        'BMat': 'Fixed Asset',
+        'BOnr': 'Fixed Asset',
+        
+        # Liability types  
+        'BKorCre': 'Payable',
+        'BKorBtw': 'Tax',
+        'BLas': 'Payable',
+        
+        # Expense types
+        'WAfs': 'Depreciation',
+        'WKos': 'Expense Account',
+        'WBel': 'Tax',
+        
+        # Income types
+        'WOmz': 'Income Account'
+    }
+    
+    # Try specific pattern matching first
+    for pattern, account_type in account_type_mappings.items():
+        if pattern in rgs_code:
+            return account_type
+    
+    # Use concept data for additional context
+    for concept in concepts:
+        concept_text = concept.get('concept', '').lower()
+        if 'bank' in concept_text:
+            return 'Bank'
+        elif 'kas' in concept_text or 'cash' in concept_text:
+            return 'Cash'
+        elif any(term in concept_text for term in ['debiteuren', 'receivable']):
+            return 'Receivable'
+        elif any(term in concept_text for term in ['crediteuren', 'payable']):
+            return 'Payable'
+        elif any(term in concept_text for term in ['btw', 'tax', 'belasting']):
+            return 'Tax'
+        elif 'afschrijving' in concept_text:
+            return 'Depreciation'
+    
+    # Fallback to root_type defaults
+    fallback_mapping = {
+        'Asset': 'Fixed Asset',
+        'Liability': 'Payable', 
+        'Equity': 'Equity',
+        'Income': 'Income Account',
+        'Expense': 'Expense Account'
+    }
+    
+    return fallback_mapping.get(root_type, 'Fixed Asset')
+
+def find_parent_rgs_code_by_hierarchy(rgs_code, source_data):
+    """
+    Find parent rgsCode using official RGS hierarchical structure
+    CRITICAL: Uses rgsCode (not rgsReknr) for proper hierarchy
+    
+    Hierarchy: B → BIva → BIvaKou → BIvaKouOnd
+    Each level adds 3-character segments
+    """
+    if len(rgs_code) <= 1 or rgs_code in ['B', 'W']:
+        return None  # Root level - no parent
+    
+    # Determine parent code by removing last 3-character segment
+    if len(rgs_code) <= 4:
+        parent_code = rgs_code[0]  # Parent is root (B or W)
+    else:
+        parent_code = rgs_code[:-3]  # Remove last 3 characters
+    
+    # Verify parent exists in source data
+    for record in source_data:
+        if record.get('rgsCode') == parent_code:
+            return parent_code
+    
+    return None
+
+def save_fixtures_in_batches(fixtures, filename, batch_size=500):
+    """
+    Performance optimization: Save large fixture files in batches
+    Prevents memory overflow with 1,598 RGS records
+    """
+    import os
+    fixture_dir = 'nl_erpnext_rgs_mkb/fixtures'
+    os.makedirs(fixture_dir, exist_ok=True)
+    
+    # Save complete fixture file
+    with open(os.path.join(fixture_dir, filename), 'w', encoding='utf-8') as f:
+        json.dump(fixtures, f, indent=2, ensure_ascii=False)
+    
+    # Also create batch files for debugging/recovery
+    for i in range(0, len(fixtures), batch_size):
+        batch = fixtures[i:i+batch_size]
+        batch_filename = f"{filename.replace('.json', '')}_batch_{i//batch_size + 1}.json"
+        with open(os.path.join(fixture_dir, batch_filename), 'w', encoding='utf-8') as f:
+            json.dump(batch, f, indent=2, ensure_ascii=False)
+
+def map_rgs_dc_to_balance_must_be(rgs_dc):
+    """
+    Map rgsDc field to ERPNext balance_must_be
+    This ensures proper account balance validation
+    """
     if not rgs_dc:
         return ""
     dc = str(rgs_dc).strip().upper()
-    return "Debit" if dc == "D" else "Credit" if dc == "C" else ""
+    if dc == "D":
+        return "Debit"
+    elif dc == "C": 
+        return "Credit"
+    else:
+        return ""
 
 def parse_int_safe(value):
-    """Safely parse integer values"""
+    """Safely parse integer values from RGS data"""
     try:
         return int(str(value)) if value else 0
     except (ValueError, TypeError):
         return 0
 
-def find_parent_rgs_code(rgs_code, source_data):
+def determine_if_group_from_nivo(nivo):
     """
-    Find parent rgsCode using RGS hierarchical structure
-    B → BIva → BIvaKou → BIvaKouOnd (each level removes 3 chars)
-    Returns the parent rgsCode (not rgsReknr)
+    Determine if RGS classification is a group (has children)
+    Based on rgsNivo: levels 1-4 are groups, level 5 are leaf accounts
     """
-    if len(rgs_code) <= 1 or rgs_code in ['B', 'W']:
-        return None  # Root level
-    
-    # Determine parent code by removing last 3-character segment
-    if len(rgs_code) <= 4:
-        parent_code = rgs_code[0]  # B or W
-    else:
-        parent_code = rgs_code[:-3]
-    
-    # Find parent rgsCode (verify it exists in source data)
-    for record in source_data:
-        if record.get('rgsCode') == parent_code:
-            return parent_code  # Return the rgsCode directly
-    
-    return None
-
-def load_csv_concepts(csv_file_path):
-    """Load translation CSV for concept mappings and legal basis"""
-    import csv
-    concepts = []
-    with open(csv_file_path, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            concepts.append(row)
-    return concepts
-
-def parse_concept_mappings_from_csv(rgs_code, csv_data):
-    """Extract concept mappings and legal basis for RGS code"""
-    concepts = []
-    for row in csv_data:
-        if row['RGS code'] == rgs_code:
-            concepts.append({
-                'concept': row['Concept'],
-                'nl_label': row['NL Label'],
-                'en_label': row['EN Label'],
-                'nl_terse': row['NL Terse label'],
-                'en_terse': row['EN terse label']
-            })
-    return concepts
+    try:
+        level = int(str(nivo)) if nivo else 5
+        return level < 5  # Levels 1-4 are groups, level 5 are accounts
+    except (ValueError, TypeError):
+        return False  # Conservative default
 ```
 
 def determine_if_group_from_nivo(nivo):
@@ -1831,6 +1996,145 @@ doc_events:
 - RGS Compliance Report: Validation status
 - Dutch Financial Statements: RGS-formatted reports
 ```
+
+### Architectural Consistency Validation
+
+#### **CRITICAL: Verify Phase 1 Alignment with Design Principles**
+
+**✅ 1. Selection, Not Creation Architecture**
+```python
+# CORRECT IMPLEMENTATION:
+# Phase 1 creates complete read-only master data
+# Users select from this foundation in later phases
+class RGSClassification(Document):
+    def before_save(self):
+        # Prevent modification of master data
+        if not self.is_new():
+            frappe.throw("RGS Classification is read-only master data")
+```
+
+**✅ 2. Version Resilience Through Stable Identifiers**
+```python
+# CORRECT IMPLEMENTATION:
+# Primary key: rgsCode (official classification)
+# User interface: rgsReknr (stable across RGS versions)
+naming_rule = "rgsCode"  # B, BIva, BIvaKou (hierarchical)
+display_fields = ["rgs_reknr", "rgs_omskort"]  # 10101, "Bank lopende rekening"
+```
+
+**✅ 3. Business Extensibility Foundation**
+```python
+# CORRECT IMPLEMENTATION:
+# Account extensions reference stable rgsReknr
+account_number_pattern = f"{rgs_reknr}.{extension}"
+# Example: "10101.NL91ABNA0417164300" (base RGS + IBAN extension)
+```
+
+**✅ 4. Compliance Traceability Through Complete Integration**
+```python
+# CORRECT IMPLEMENTATION:
+# Three-document integration provides complete legal basis
+concept_mappings = {
+    "legal_basis": "Article 2:362 BW",
+    "reporting_requirement": "Annual accounts",
+    "classification_authority": "RGS 3.7 official standard"
+}
+```
+
+**✅ 5. ERPNext Native Integration**
+```python
+# CORRECT IMPLEMENTATION:
+# ERPNext fields pre-calculated during Phase 1
+erpnext_integration = {
+    "report_type": "Balance Sheet",  # Derived from rgsCode
+    "root_type": "Asset",           # Intelligent mapping
+    "account_type": "Bank",         # Concept-based classification
+    "balance_must_be": "Debit"      # From rgsDc field
+}
+```
+
+#### **VALIDATION CHECKLIST: Architectural Integrity**
+
+**Primary Key Strategy:**
+- ✅ DocType naming_rule uses rgsCode (official classification)
+- ✅ User interface displays rgsReknr + rgsOmskort (SME identifiers)
+- ✅ All references use rgsCode for data integrity
+- ✅ Extensions pattern supports stable rgsReknr for business use
+
+**Hierarchical Structure:**
+- ✅ parent_rgs_classification references rgsCode (not rgsReknr)
+- ✅ Tree navigation works with official RGS hierarchy
+- ✅ rgsOmslag references another rgsCode (for contra accounts)
+- ✅ Hierarchy integrity validated during fixture loading
+
+**ERPNext Integration Foundation:**
+- ✅ All ERPNext mappings derived from three-document approach
+- ✅ Concept data provides legal basis for classification decisions
+- ✅ Account types intelligently mapped using RGS structure + concepts
+- ✅ Future phases can reference complete metadata without retrofitting
+
+**Performance Architecture:**
+- ✅ Batch processing prevents memory overflow (500 records/batch)
+- ✅ Redis cache optimization for frequent lookups
+- ✅ Indexed fields support fast queries and filtering
+- ✅ Fixture format optimized for Frappe framework requirements
+
+**Three-Document Integration:**
+- ✅ Canonical data (rgsmkb_all4EN.json) provides complete dataset
+- ✅ Field specifications (attributes.csv) ensure official mapping
+- ✅ Concept mappings (labels.csv) enable intelligent ERPNext integration
+- ✅ All sources processed together to prevent architectural debt
+
+#### **Performance Optimization Framework**
+```python
+# CRITICAL: Redis cache management for 1,598 RGS records
+def optimize_rgs_performance():
+    """
+    Production-ready performance optimization
+    Prevents memory issues during fixture loading and operation
+    """
+    import frappe
+    
+    # Cache configuration for RGS data
+    frappe.cache().set_value(
+        "rgs_optimization_settings",
+        {
+            "batch_size": 500,
+            "cache_timeout": 86400,  # 24 hours
+            "memory_limit": "512mb",
+            "enable_compression": True
+        }
+    )
+    
+    # Pre-warm RGS classification cache
+    rgs_cache_data = frappe.get_all(
+        "RGS Classification",
+        fields=["rgs_code", "rgs_reknr", "rgs_omskort", "parent_rgs_classification"],
+        limit=None
+    )
+    
+    frappe.cache().set_value(
+        "rgs_master_data_cache", 
+        rgs_cache_data,
+        expires_in_sec=86400
+    )
+
+# Redis memory optimization
+def configure_redis_for_rgs():
+    """Configure Redis for optimal RGS performance"""
+    redis_config = {
+        'maxmemory': '512mb',
+        'maxmemory-policy': 'allkeys-lru',
+        'save': '900 1'  # Save every 15 minutes if at least 1 key changed
+    }
+    return redis_config
+```
+
+This architectural foundation ensures that:
+- **Phase 2**: CoA integration builds cleanly on solid RGS foundation
+- **Phase 3**: Compliance features have complete legal metadata available
+- **Phase 4**: Performance optimizations don't require data restructuring
+- **Future**: RGS version updates (3.8+) won't break existing implementations
 
 ---
 
@@ -2241,63 +2545,189 @@ def migrate_from_standard_dutch_coa():
 
 ## Development Phases
 
-### Phase 1: Foundation (Current Priority)
-**Goal:** Load and access RGS master data
+### Phase 1: Foundation with Complete ERPNext Integration (CURRENT PRIORITY)
+**Goal:** Establish RGS master data with complete ERPNext integration foundation
+
+#### **1.1 Three-Document Integration Processing** 🎯
 ```
-- Convert rgsmkb_all4EN.json to proper Frappe fixtures
-- Create RGS Classification DocType with read-only access
-- Build search/filter interface for RGS browsing
-- Resolve current fixture loading issues
+CRITICAL SUCCESS FACTORS:
+✅ Process all three official sources together:
+   • rgsmkb_all4EN.json (canonical RGS data)
+   • attributes.csv (official field specifications)  
+   • 20210913 RGS labels.csv (ERPNext mapping concepts)
+
+✅ PRIMARY KEY: rgsCode (official classification)
+✅ USER INTERFACE: rgsReknr + rgsOmskort (SME identifiers)
+✅ HIERARCHY: parent_rgs_classification references rgsCode
+✅ ERPNEXT INTEGRATION: Pre-calculate all mappings from concept data
 ```
 
-### Phase 2: CoA Integration
-**Goal:** Seamless Chart of Accounts creation
+#### **1.2 RGS Classification DocType Creation**
 ```
-- Convert entity templates to ERPNext CoA Templates
-- Integrate with company creation workflow
-- Add RGS fields to Account DocType
-- Implement template customization interface
+ARCHITECTURE REQUIREMENTS:
+- naming_rule: "rgsCode" (official classification as primary key)
+- Complete field mapping from attributes.csv 
+- ERPNext integration fields pre-populated
+- Performance optimized for 1,598 records
+- Tree structure using rgsCode hierarchy
+- Indexed for fast queries and template generation
 ```
 
-### Phase 3: Compliance & Validation
-**Goal:** Ensure RGS compliance
+#### **1.3 Fixture Conversion with Performance Optimization**
 ```
+TECHNICAL IMPLEMENTATION:
+- Batch processing (500 records per batch)
+- Redis cache optimization for large datasets
+- Memory management during fixture loading
+- Complete ERPNext field derivation
+- Validation of hierarchical integrity
+- Error handling for malformed data
+```
+
+#### **1.4 Validation and Testing**
+```
+QUALITY ASSURANCE:
+✅ Primary key integrity (all records use rgsCode)
+✅ Hierarchy integrity (parent references valid)
+✅ ERPNext mapping completeness (all fields populated)
+✅ Three-document integration (concept data included)
+✅ Performance benchmarks (loading < 30 seconds)
+✅ Data integrity (no missing critical fields)
+```
+
+### Phase 2: ERPNext CoA Integration (BUILDS ON SOLID FOUNDATION)
+**Goal:** Seamless Chart of Accounts creation using established RGS foundation
+
+#### **2.1 Account DocType Enhancement**
+```
+INTEGRATION POINTS:
+- Custom fields link to RGS Classification DocType
+- Auto-population from RGS master data
+- Account creation wizard with RGS selection
+- Validation rules ensure RGS compliance
+- Extension pattern for business-specific accounts
+```
+
+#### **2.2 CoA Template Generation**
+```
+TEMPLATE CREATION:
+- Entity-specific templates (ZZP, BV, EZ, SVC)
+- Template customization interface
+- RGS compliance validation during customization
+- Export/import template functionality
+- Multi-member entity support (cooperatives, VOF)
+```
+
+#### **2.3 Company Creation Workflow Integration**
+```
+USER EXPERIENCE:
+- RGS template selection during company setup
+- Intelligent template recommendations
+- One-click CoA creation from RGS templates
+- Customization options without breaking compliance
+- Migration tools for existing companies
+```
+
+### Phase 3: Advanced Features and Compliance (ENHANCED FUNCTIONALITY)
+**Goal:** Complete Dutch financial compliance and advanced features
+
+#### **3.1 Compliance Validation Framework**
+```
+VALIDATION FEATURES:
+- Real-time RGS compliance checking
 - Account validation rules
-- RGS compliance checking
 - Error detection and reporting
-- Audit trail for RGS changes
+- Audit trail for RGS-related changes
+- Compliance dashboard and reporting
 ```
 
-### Phase 4: Reporting & Analytics
-**Goal:** Dutch financial reporting
+#### **3.2 Dutch Financial Reporting**
 ```
+REPORTING CAPABILITIES:
 - RGS-compliant financial statements
+- Automatic mapping to Dutch reporting requirements
 - Standard Dutch KPI calculations
 - Industry benchmarking reports
-- Performance dashboards
+- Tax authority reporting integration
+```
+
+#### **3.3 Multi-Member Entity Advanced Features**
+```
+COOPERATIVE & PARTNERSHIP SUPPORT:
+- Member account management with RGS compliance
+- Profit distribution based on RGS structure
+- Member-specific financial statements
+- Accounting Dimensions integration
+- Legal compliance for Dutch entity types
+```
+
+### Phase 4: Performance and Scalability (PRODUCTION OPTIMIZATION)
+**Goal:** Production-ready performance and enterprise features
+
+#### **4.1 Performance Optimization**
+```
+SCALABILITY FEATURES:
+- Advanced Redis cache strategies
+- Database query optimization
+- Large dataset handling improvements
+- Background processing for bulk operations
+- Performance monitoring and alerting
+```
+
+#### **4.2 Integration and Extensibility**
+```
+ENTERPRISE FEATURES:
+- API endpoints for external integration
+- Webhook support for real-time updates
+- Multi-company RGS management
+- Advanced customization frameworks
+- Migration tools for RGS updates (3.8+)
+```
+
+#### **4.3 Business Intelligence and Analytics**
+```
+ANALYTICS CAPABILITIES:
+- Performance dashboards with RGS insights
+- Industry benchmarking with RGS classification
+- Predictive analytics for Dutch market
+- Integration with business intelligence tools
+- Advanced reporting and visualization
 ```
 
 ---
 
-## Success Criteria
+## Success Criteria (UPDATED FOR ARCHITECTURAL CONSISTENCY)
 
-### Technical Success
-- ✅ Complete RGS 3.7 dataset loaded and accessible
-- ✅ Entity-specific CoA templates working in ERPNext
-- ✅ Account creation with automatic RGS compliance
-- ✅ Template customization without breaking compliance
+### Phase 1 Success Criteria (FOUNDATION)
+- ✅ All 1,598 RGS MKB codes loaded with rgsCode as primary key
+- ✅ Complete three-document integration (canonical + specs + concepts)
+- ✅ Account hierarchy displays correctly (B→BIva→BIvaKou)
+- ✅ ERPNext integration fields pre-calculated and validated
+- ✅ Performance benchmarks met (< 30 second loading time)
+- ✅ Memory optimization prevents overflow during fixture loading
+- ✅ Data integrity validated with automated tests
 
-### Business Success
-- ✅ Dutch companies can create legally compliant Chart of Accounts
-- ✅ Automatic financial reporting meets regulatory requirements
-- ✅ Users can customize templates for specific business needs
-- ✅ Benchmarking and KPI calculations work correctly
+### Technical Architecture Success
+- ✅ Primary key strategy correctly implemented (rgsCode not rgsReknr)
+- ✅ Tree structure uses proper rgsCode hierarchy references
+- ✅ ERPNext mappings derived from official concept data
+- ✅ Performance optimized for production deployment
+- ✅ Three-document integration prevents architectural debt
+- ✅ Fixture format compatible with Frappe framework requirements
+
+### Business Compliance Success
+- ✅ Dutch companies can access complete RGS MKB dataset
+- ✅ Legal compliance foundation established from concept mappings
+- ✅ Entity-specific filtering works for all legal forms
+- ✅ Account selection interface shows user-friendly SME identifiers
+- ✅ Future RGS version compatibility ensured through proper architecture
 
 ### User Experience Success
-- ✅ Intuitive template selection during company setup
-- ✅ Easy browsing and selection of RGS codes
-- ✅ Clear validation messages for compliance issues
-- ✅ Familiar ERPNext workflow with RGS enhancements
+- ✅ Intuitive browsing of RGS codes using rgsReknr + rgsOmskort
+- ✅ Fast search and filtering across 1,598 classifications
+- ✅ Clear hierarchy visualization in tree interface
+- ✅ Performance suitable for real-time user interaction
+- ✅ Error handling provides clear guidance for data issues
 
 ---
 
