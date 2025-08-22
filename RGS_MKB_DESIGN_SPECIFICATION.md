@@ -826,7 +826,7 @@ def import_large_rgs_fixtures_legacy():
 ```
 ```
 
-#### Docker Performance Tuning
+#### Docker Performance Tuning & Build Optimization
 ```yaml
 # docker-compose.override.yml for development
 services:
@@ -844,6 +844,52 @@ services:
     
   redis-queue:
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+```
+
+#### 🚀 **BREAKTHROUGH: Build-Time Fixture Processing**
+```dockerfile
+# NEW APPROACH: Process large RGS fixtures during Docker build, not runtime
+# This eliminates memory issues and provides fast, predictable deployments
+
+FROM builder AS fixture-processor
+
+# Create temporary build site with SQLite (no external DB needed)
+RUN bench new-site build-temp.local \
+    --db-type sqlite \
+    --admin-password admin \
+    --install-app erpnext,nl_erpnext_rgs_mkb && \
+    # Process RGS fixtures during build
+    bench --site build-temp.local execute nl_erpnext_rgs_mkb.build_utils.convert_rgs_fixtures_for_build && \
+    # Setup translations during build  
+    bench --site build-temp.local execute nl_erpnext_rgs_mkb.build_utils.setup_rgs_translations && \
+    # Cleanup build site, preserve optimized data
+    rm -rf sites/build-temp.local
+
+FROM base AS backend
+COPY --from=fixture-processor --chown=frappe:frappe /home/frappe/frappe-bench /home/frappe/frappe-bench
+
+# Result: Production image with pre-processed RGS data, ready for instant deployment
+```
+
+#### Build Optimization Benefits
+```
+🏗️  BUILD TIME: Heavy processing (1,598+ records, 58,029 translations)
+├── Temporary SQLite site creation
+├── Three-document RGS integration  
+├── ERPNext mapping pre-calculation
+├── Translation file generation
+└── Optimized fixture creation
+
+🚀 RUNTIME: Lightning fast deployment
+├── Pre-processed fixtures load in seconds
+├── No memory bottlenecks during site creation
+├── Immediate multilingual support
+├── Predictable, repeatable deployments
+└── Horizontal scaling ready
+
+Usage:
+docker buildx bake rgs-optimized --set rgs-optimized.args.APPS_JSON_BASE64=$(base64 -w 0 apps.json)
+docker compose --profile create-site-rgs up -d
 ```
 
 ### Migration and Maintenance Strategy
