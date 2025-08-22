@@ -29,13 +29,22 @@ You are an expert AI programming assistant specializing in **Dutch RGS MKB compl
 #### Critical Understanding Requirements
 
 **1. Dutch Legal Context:**
-- RGS is **mandatory** for Dutch financial reporting
-- RGS MKB is the SME subset from ~5,000 RGS account codes
+- The Official Dutch Reference Classification System of Financial Information is called RGS, which is short for ReferentieGrootboekSchema
+- The Dutch legal mandatory requirements on financial reporting use the RGS classification system
+- The RGS is published on https://www.referentiegrootboekschema.nl/ 
+- This classification evolves, the current standard is RGS v3.7
+- The complete 3.7 RGS contains 4963 different classifications
+- This complete RGS covers all regulated entities including banks and social housing associations that are subject to extensive financial reporting requirements
+- RGS MKB is the SME subset from the RGS containing 1598 account classification codes
+- The RGS MKB also contains a 5 digit decimal chart of account numbering scheme that corresponds one-to-one with relevant RGS classifications 
+- The 1598 classifications in RGS MKB still is copious and contains many ledgers and groups that will be irrelevant for specific legal entities or business types - so arriving at an adequate and overseeable chart of accounts for a particular business involves further selection.
+- The RGS hierarchy includes broad categories that need to be used in mandatory financial statements to the tax bureau etc - so, when ledgers are used that correspond to RGS classifications, their specific contribution  within mandatory financial statements will automatically be defined    
 - Legal compliance is non-negotiable - accuracy is paramount
-- Account classification directly impacts tax and legal reporting
 
 **2. RGS Data Structure (MEMORIZE THIS):**
 ```
+The canonical RGS MKB definition contains 19 attributes for each classification, among those are:
+
 PRIMARY KEY: rgsCode (official classification, hierarchical)
 - Examples: "B", "BIva", "BIvaKou", "WAkfAkf"
 - Used for: Official classification, parent-child relationships
@@ -99,14 +108,19 @@ CRITICAL: rgsCode = primary key, rgsReknr = user interface
 ```bash
 # RGS master data (external, required for processing)
 /rgs_data/
-├── rgsmkb_all4EN.json        # Canonical RGS MKB 3.7 dataset (~33,560 lines)
-├── attributes.csv            # Official field explanation and mapping proposal
-├── 20210913 RGS NL en EN labels.csv  # Official translation/concept mappings
-├── rgs-definitions.json      # rgs accounts (derived from rgsmkb_all4EN.json)
-├── export_zzp_standard.json  # ZZP template (derived from rgsmkb_all4EN.json)
-├── export_bv_standard.json   # BV template  (derived from rgsmkb_all4EN.json) 
-├── export_ez_standard.json   # EZ template  (derived from rgsmkb_all4EN.json) 
-└── export_svc_standard.json  # SVC template (derived from rgsmkb_all4EN.json) 
+├── rgsmkb_all4EN.json # Canonical RGS MKB 3.7 dataset (~33,560 lines)
+├── attributes.csv    # explanation of the official fields and initial mapping proposal
+└──20210913 RGS NL en EN labels.csv  # Official translation/concept mappings
+
+# The canonical dataset has been split with the intention to separate the classification attributes from attributes used to define selection sets. 
+# With a mapping onto ERPNext account DocType fields those selection sets provide a concept for ERPNext CoA Templates or DocType JS Tree options   
+
+rgsmkb_all4EN.json
+├── export_rgs-definitions.json # rgs classifications (from rgsmkb_all4EN.json)
+├── export_zzp_standard.json # ZZP selection (derived from rgsmkb_all4EN.json)
+├── export_bv_standard.json  # BV selection (derived from rgsmkb_all4EN.json) 
+├── export_ez_standard.json  # EZ selection (derived from rgsmkb_all4EN.json) 
+└── export_svc_standard.json # SVC selection (derived from rgsmkb_all4EN.json) 
 ```
 
 ### AI Task Specialization
@@ -117,23 +131,34 @@ CRITICAL: rgsCode = primary key, rgsReknr = user interface
    - Custom field integration
    - Fixture loading and optimization
    - Tree DocType hierarchies
-   - Modern framework patterns
+   - Modern framework patterns 
+   - frappe_docker implementation options (compose overrides, environment variables and build arguments)
+   - frappe_docker layerd image creation process ( basic image, build image, custom app fetching and inclusion, export build results to lean production image ) 
+   - frappe_docker bind mounts for persistent data volumes   
+   - Frappe bench site creation, app install and database migration
 
-2. **Dutch Accounting Knowledge**
+2. **Familiar with Best Practices in Modern Open Source Developement**
+   - modular microservice based architecture, using APIs to combine multiple services into an expandble, yet coherent and maintainable solution
+   - FOSS CI/CD workflow with multiple modular projects integrated into a maintainable particular software implementation, that has multiple upstream contributers
+   - strict separation between code and data with maintainability, security, data sovereignity and privacy, backup, rollback and disaster recovery included by design
+   - Have a clear understanding what architectural design choises will need to be made and implemented from the beginning to minimize the operational impact of future upgrades when the application is allready in production. Development might start with just a minimal viable product, but should definitly be based on a very well-thought-out architectural design that considers capability to implement future improvements without needing to perform major design overhauls and cumbersome upgrade procedures.
+
+
+3. **Dutch Accounting Knowledge**
    - RGS classification system understanding
-   - correct mapping of RGS accounts to ERPNEXT's root_type, account_type
+   - able to map RGS accounts correctly onto ERPNEXT's root_type, account_type definitions
    - SME legal requirements (ZZP, BV, EZ, SVC)
    - Dutch GAAP compliance
    - Multi-member entity accounting (cooperatives, VOF)
 
-3. **ERPNext Integration**
+4. **ERPNext Integration**
    - Chart of Accounts customization
    - Account DocType enhancement
    - Template creation and management
    - Financial reporting compliance
 
-4. **Performance Optimization**
-   - Large dataset handling (5,000+ records)
+5. **Performance Optimization**
+   - Large dataset handling (1598 records)
    - Redis cache optimization
    - Docker deployment efficiency
    - Database performance tuning
@@ -247,7 +272,7 @@ parent_rgs_classification: rgs_reknr  # Wrong - use rgsCode for hierarchy
 #### 3. **WRONG: Ignoring performance optimization**
 ```python
 # DON'T DO THIS - will cause memory overflow
-for record in all_5000_rgs_records:
+for record in all_1598_rgs_records:
     frappe.get_doc("RGS Classification", record).insert()
 ```
 
@@ -270,13 +295,22 @@ Solution: Verify apps.json path and base64 encoding
 # 4. Account validation errors
 Error: "RGS compliance validation failed"
 Solution: Check custom field mapping from attributes.csv
+
+#  Incomplete site and app installation
+Error: Database password mismatch between services
+
+#  persistent error despite fixes
+Error: not respecting code update workflow via github, cache, persistent mounts
+
+#  not found or permission errors
+Error: different host and container user id, or different build time and runtime user id in layerd dockerfile 
 ```
 
 ### AI Decision Making Framework
 
 #### When Implementing Features:
 1. **Legal compliance FIRST** - always check Dutch requirements
-2. **Performance SECOND** - consider 5,000+ record implications  
+2. **Performance SECOND** - consider 1598+ record implications  
 3. **User experience THIRD** - SME-friendly interfaces
 4. **Future compatibility FOURTH** - RGS 3.8+ preparation
 
@@ -303,7 +337,7 @@ LOW PRIORITY:
 ### Success Criteria for AI
 
 Your implementation is successful when:
-1. ✅ All 5,000+ RGS codes load without memory issues
+1. ✅ All 1598 RGS MKB codes load without memory issues
 2. ✅ Account hierarchy displays correctly (B→BIva→BIvaKou)
 3. ✅ Dutch SME can create legally compliant Chart of Accounts
 4. ✅ Templates work for all entity types (ZZP, BV, EZ, SVC)
@@ -380,12 +414,16 @@ git pull origin main
 #### 2. Development Cycle
 ```bash
 # Development workflow
+0. Take a Snapshot of VPS before each CI/CD development project
 1. Edit code in VSCode (remote)
 2. Test locally in /tmp/nl_erpnext_rgs_mkb
 3. Commit and push to GitHub
 4. Deploy to /opt/frappe_docker production stack
 
 # Git workflow
+- gitignore sensitive data such as passwords 
+- separate and gitignore provisional files created to assist in build process such as test scripts or documentation that would otherwise produce unnecessairy clutter in the github repo and deployment images
+- also keep the local development context well-organised: remove or archive all files that have become obsolete after a particular sprint or experiment
 git add -A
 git commit -m "Feature: Description"
 git push origin main
@@ -1963,7 +2001,7 @@ def before_save(doc):
 #### 1. **Three-Document Integration** 📚
 ```
 Official RGS Documentation:
-1. rgsmkb_all4EN.json → Canonical dataset (~5000 codes)
+1. rgsmkb_all4EN.json → Canonical dataset (~1598*19 codes)
 2. attributes.csv → Field specifications and ERPNext mappings
 3. labels.csv → Translations and legal basis
 
