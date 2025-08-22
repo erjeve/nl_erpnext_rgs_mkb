@@ -1175,111 +1175,255 @@ RGS MKB App Integration Points:
 
 ## Docker Distribution Strategy
 
-### 🌍 **Vision: Generic Dutch ERPNext Distribution**
+### � **Purpose: Household ZZP Accounting Solution**
 
-The RGS MKB app has evolved beyond a single-company implementation into a **comprehensive distribution solution** for the entire Dutch SME market. Through innovative build-time optimization, we now deliver a generic, market-ready Docker image that transforms ERPNext deployment for Dutch businesses.
+The RGS MKB app is developed primarily to meet the Dutch accounting needs and legal obligations for a household with two ZZP (Zelfstandige Zonder Personeel) businesses. The implementation follows FOSS principles by contributing back improvements and integrations to the community.
 
-### 🎯 **Distribution Architecture Overview**
+### 🎯 **Project Scope & Goals**
 
-#### **Core Concept: "Batteries Included" Dutch ERPNext**
+#### **Primary Objective: Multi-ZZP Household Administration**
 ```
-Single Docker Image Contains:
-├── ✅ Complete ERPNext installation (version-15)
-├── ✅ Pre-loaded RGS 3.7+ compliance (1,598 classifications)  
-├── ✅ Built-in Dutch/English translations (58,029 entries)
-├── ✅ Optimized fixtures (seconds deployment vs minutes)
-├── ✅ SME templates (ZZP, BV, EZ, SVC) ready-to-use
-├── ✅ Pre-calculated ERPNext field mappings
-├── ✅ Migration & disaster recovery capabilities
-└── ✅ Platform-agnostic deployment (Docker standard)
-```
+Real-World Household Challenges:
+├── ✅ Two ZZP businesses requiring separate administrations
+├── ✅ Service-based invoicing with time tracking (not retail-focused)
+├── ✅ Shared resources management (credit cards, equipment, licenses)
+├── ✅ Cross-company collaboration and mutual service offsetting
+├── ✅ Household-level income consolidation and tax reporting
+├── ✅ Bank statement distribution across business/private transactions
+├── ✅ Combined household financial insight and planning
+└── ✅ Affordable single solution (not costly multi-addon approach)
 
-#### **Market Transformation Impact**
-```
-Before (Traditional Approach):
-├── ❌ Complex per-client technical setup
-├── ❌ Inconsistent deployments across providers
-├── ❌ Manual RGS compliance configuration
-├── ❌ Platform lock-in with service providers
-└── ❌ Lengthy deployment procedures
-
-After (Distribution Strategy):
-├── ✅ Single docker run command deploys complete solution
-├── ✅ Consistent experience across all providers
-├── ✅ Zero-configuration RGS compliance
-├── ✅ Platform migration freedom for businesses
-└── ✅ Service providers focus on value-add services
+Gap in Current Market:
+├── ❌ Most software focuses on retail, not service businesses
+├── ❌ Project/time management comes as expensive addons
+├── ❌ Single-entity focus, no multi-company household support
+├── ❌ No shared resource management between companies
+├── ❌ No mutual service offsetting capabilities
+├── ❌ No household-level financial consolidation
+└── ❌ No integrated personal/business transaction handling
 ```
 
-### 🏗️ **Build Infrastructure**
+#### **Technical Requirements for Household Use Case**
+```
+Multi-Company Architecture:
+├── ✅ Two separate ZZP company administrations
+├── ✅ Optional holding entity for shared assets
+├── ✅ Cross-company transaction handling
+├── ✅ Mutual service invoicing and offsetting
+├── ✅ Consolidated household financial reporting
+├── ✅ Bank statement distribution logic
+└── ✅ Personal vs business transaction classification
 
-#### **Enhanced docker-bake.hcl Configuration**
+Service Business Focus:
+├── ✅ Time-based project management
+├── ✅ Service invoicing (not product/retail)
+├── ✅ Client project tracking
+├── ✅ Resource allocation across projects
+├── ✅ Cross-company collaboration tracking
+└── ✅ Professional service delivery workflows
+```
+
+#### **FOSS Community Contribution**
+```
+Sharing Solution for Similar Households:
+├── ✅ Document dual-ZZP household administration patterns
+├── ✅ Share multi-company ERPNext configuration
+├── ✅ Contribute Dutch localization for service businesses
+├── ✅ Provide working example for household financial management
+├── ✅ Open source shared resource management patterns
+└── ✅ Help other households facing same administrative challenges
+```
+
+### 💼 **Household Administration Workflows**
+
+#### **Core Household Challenges Addressed**
+
+##### **1. Dual-ZZP Service Business Management**
+```
+Service Business Requirements:
+├── ✅ Time-based project tracking (not retail/inventory focus)
+├── ✅ Client project management across both ZZPs
+├── ✅ Cross-company collaboration and mutual service billing
+├── ✅ Professional service delivery workflows
+├── ✅ Resource allocation and utilization tracking
+└── ✅ Project profitability analysis per ZZP
+
+ERPNext Integration:
+├── Projects module for client engagement tracking
+├── Timesheet module for service hour recording
+├── Sales Invoice with time-based billing
+├── Cross-company inter-company transactions
+├── Resource planning for shared equipment/licenses
+└── Project costing and profitability reports
+```
+
+##### **2. Shared Resource Management**
+```
+Shared Asset Categories:
+├── 🏢 Office space and utilities (Holdings → ZZPs allocation)
+├── 💳 Credit cards and payment instruments
+├── 🖥️ Software licenses and subscriptions
+├── 🚗 Company vehicles and transportation
+├── 📱 Equipment and technology assets
+└── 📊 Professional services (accountant, legal, insurance)
+
+Implementation Pattern:
+├── Holdings entity owns shared assets
+├── Cost allocation to ZZPs based on usage
+├── Inter-company billing for resource usage
+├── Consolidated reporting for household overview
+├── Tax optimization through proper entity allocation
+└── Clear audit trail for business vs personal use
+```
+
+##### **3. Bank Statement Distribution Logic**
+```
+Mixed Transaction Processing:
+├── 📥 Import complete bank statements 
+├── 🏷️ Classify transactions by entity:
+│   ├── ZZP A business transactions
+│   ├── ZZP B business transactions  
+│   ├── Holdings shared resource transactions
+│   └── Personal/household transactions
+├── ✅ Maintain complete bank ledger reconciliation
+├── 📊 Generate separate entity reports
+└── 🏠 Provide household-level financial overview
+
+Automated Classification Rules:
+├── Payee-based automatic classification
+├── Amount pattern recognition
+├── Transaction category suggestions
+├── Manual override and learning
+├── Audit trail for all classifications
+└── Year-end household tax preparation support
+```
+
+##### **4. Cross-Company Collaboration Workflows**
+```
+Mutual Service Scenarios:
+├── ZZP A provides services to ZZP B's client project
+├── ZZP B assists with ZZP A's specialized requirements
+├── Shared project delivery with revenue/cost splitting
+├── Knowledge transfer and training between ZZPs
+├── Equipment sharing and resource optimization
+└── Combined household income offsetting
+
+ERPNext Implementation:
+├── Inter-company sales/purchase invoices
+├── Project collaboration tracking
+├── Timesheet allocation across companies
+├── Automatic offsetting journal entries
+├── Consolidated household P&L reporting
+└── Tax preparation with proper entity separation
+```
+
+#### **Household Tax Integration**
+```
+Annual Tax Preparation Requirements:
+├── 📋 Combined household income declaration
+├── 📊 Separate ZZP business reporting
+├── 🏠 Personal vs business expense classification
+├── 💰 Shared resource allocation documentation
+├── 📈 Investment and asset reporting
+└── 🎯 Tax optimization through entity structure
+
+ERPNext Reports Generated:
+├── Individual ZZP P&L and Balance Sheets (RGS compliant)
+├── Holdings entity financial statements
+├── Consolidated household income summary
+├── Business vs personal expense classification
+├── Asset depreciation and investment tracking
+└── Supporting documentation for tax advisor
+```
+
+### 🏗️ **Multi-Company Household Architecture**
+
+#### **Company Structure for Dual-ZZP Household**
+```
+Household Entity Structure:
+├── Household Holdings BV (Optional - Shared Resources)
+│   ├── Shared equipment and licenses
+│   ├── Credit cards and financial instruments
+│   ├── Office space and utilities
+│   └── Consolidated reporting and tax preparation
+│
+├── [Spouse A] ZZP - Service Company 1
+│   ├── Independent client relationships
+│   ├── Project-specific time tracking
+│   ├── Service-based invoicing
+│   └── RGS MKB compliant administration
+│
+└── [Spouse B] ZZP - Service Company 2
+    ├── Independent client relationships
+    ├── Project-specific time tracking
+    ├── Service-based invoicing
+    └── RGS MKB compliant administration
+
+Cross-Company Flows:
+├── Mutual service invoicing (ZZP A ↔ ZZP B)
+├── Shared resource allocation (Holdings → ZZPs)
+├── Household consolidation (All → Combined reporting)
+└── Bank statement distribution (Mixed → Separate entities)
+```
+
+#### **Docker Configuration for Household ZZP Setup**
 ```hcl
 # /opt/frappe_docker/docker-bake.hcl
 
-target "nl-erpnext-rgs-mkb" {
-  dockerfile = "images/custom/Containerfile.rgs-optimized"
+target "nl-erpnext-household" {
+  dockerfile = "images/custom/Containerfile.household-optimized"
   context = "."
   
-  # Comprehensive tagging strategy for Dutch market
+  # Household-specific tagging
   tags = [
-    # Primary distribution tags
-    "erjeve/nl-erpnext-rgs-mkb:latest",
-    "erjeve/nl-erpnext-rgs-mkb:3.7.0",
-    
-    # Market discovery tags
-    "erjeve/dutch-erpnext:latest", 
-    "erjeve/erpnext-mkb:latest",
-    
-    # Version management
-    "erjeve/nl-erpnext-rgs-mkb:rgs-3.7",
-    "erjeve/nl-erpnext-rgs-mkb:frappe-develop",
-    
-    # Migration & backup support
-    "erjeve/nl-erpnext-rgs-mkb:backup-ready",
-    "erjeve/nl-erpnext-rgs-mkb:migration-3.7.0"
+    "erjeve/nl-erpnext-household:latest",
+    "erjeve/nl-erpnext-household:dual-zzp",
+    "dutch-erpnext:multi-zzp"
   ]
   
-  # Professional container metadata
+  # Household deployment metadata
   labels = {
-    "org.opencontainers.image.title" = "Dutch ERPNext with RGS MKB Compliance"
-    "org.opencontainers.image.description" = "Complete ERPNext solution for Dutch SMEs with built-in RGS 3.7+ compliance, translations, and optimized templates"
-    "org.opencontainers.image.vendor" = "Dutch ERPNext Community"
+    "org.opencontainers.image.title" = "Dutch ERPNext for Multi-ZZP Households"
+    "org.opencontainers.image.description" = "Multi-company ERPNext for dual-ZZP households with shared resource management"
+    "org.opencontainers.image.vendor" = "Household Solution Project"
     "org.opencontainers.image.licenses" = "MIT"
     "org.opencontainers.image.documentation" = "https://github.com/erjeve/nl_erpnext_rgs_mkb"
     "org.opencontainers.image.source" = "https://github.com/erjeve/nl_erpnext_rgs_mkb"
     
-    # Dutch market specific labels
+    # Household-specific labels
     "nl.erp.rgs.version" = "3.7"
-    "nl.erp.compliance" = "dutch-gaap,rgs-mkb,cbs-reporting"
-    "nl.erp.entity.support" = "zzp,bv,ez,svc,cooperative,vof"
-    "nl.erp.languages" = "nl,en"
-    "nl.erp.deployment" = "instant,optimized,production-ready"
+    "nl.erp.compliance" = "dutch-gaap,rgs-mkb,zzp-obligations,household-tax"
+    "nl.erp.entity.support" = "dual-zzp,holdings,shared-resources"
+    "nl.erp.use-case" = "dual-zzp,service-business,household-administration"
+    "nl.erp.features" = "multi-company,time-tracking,rgs-compliance,shared-resources"
   }
   
-  # Build arguments for customization
+  # Build arguments for household deployment
   args = {
     APPS_JSON_BASE64 = ""  # Set via command line
     FRAPPE_BRANCH = "develop"
     ERPNEXT_BRANCH = "version-15"
     RGS_VERSION = "3.7"
-    BUILD_OPTIMIZATION = "enabled"
+    BUILD_OPTIMIZATION = "household"
+    ENABLE_PROJECTS = "true"
+    ENABLE_TIMESHEET = "true"
+    ENABLE_MULTI_COMPANY = "true"
   }
   
-  # Multi-platform support 
-  platforms = ["linux/amd64", "linux/arm64"]
+  # Focus on primary platform for household use
+  platforms = ["linux/amd64"]
   
-  # Output configuration for distribution
-  output = ["type=registry"]
+  # Local Docker registry for personal deployment
+  output = ["type=docker"]
 }
 
-# Development target for local testing
+# Development target for testing
 target "nl-erpnext-dev" {
   inherits = ["nl-erpnext-rgs-mkb"]
   
   tags = [
     "erjeve/nl-erpnext-rgs-mkb:dev",
-    "erjeve/dutch-erpnext:dev"
+    "dutch-erpnext:dev"
   ]
   
   # Development-specific optimizations
@@ -1305,69 +1449,91 @@ docker buildx bake nl-erpnext-rgs-mkb \
 # - Professional container metadata and labels
 ```
 
-### 🚀 **Deployment Workflows**
+### 🚀 **Household Deployment Workflows**
 
-#### **End-User Deployment (SME Businesses)**
+#### **Complete Household Setup**
+
+##### **One-Command Household Deployment**
 ```bash
-# ONE-COMMAND DEPLOYMENT for Dutch SMEs
-docker run -d --name mijn-erp \
+# Deploy complete dual-ZZP household administration
+docker run -d --name household-erp \
   -p 8080:8000 \
-  -e SITE_NAME=mijn-bedrijf.local \
+  -e HOUSEHOLD_NAME="Smith Family Administration" \
+  -e ZZP_A_NAME="Alice Smith Consulting" \
+  -e ZZP_B_NAME="Bob Smith Solutions" \
   -e ADMIN_PASSWORD=VeiligWachtwoord123 \
-  -e INSTALL_APPS=erpnext,nl_erpnext_rgs_mkb \
-  -v erp-data:/home/frappe/frappe-bench/sites \
-  erjeve/nl-erpnext-rgs-mkb:latest
+  -e ENABLE_MULTI_COMPANY=true \
+  -e ENABLE_PROJECTS=true \
+  -e ENABLE_TIMESHEET=true \
+  -v household-data:/home/frappe/frappe-bench/sites \
+  erjeve/nl-erpnext-household:latest
 
-# Access complete Dutch ERPNext at: http://localhost:8080
-# - RGS compliance automatically configured
-# - Dutch/English translations ready
-# - SME templates available (ZZP, BV, EZ, SVC)
-# - Professional Chart of Accounts pre-loaded
+# Access your household ERPNext setup at: http://localhost:8080
+# - Dual ZZP companies automatically configured
+# - Optional Holdings entity for shared resources
+# - RGS compliance for all entities
+# - Project and timesheet modules enabled
+# - Cross-company workflows ready
 ```
 
-#### **Service Provider Deployment (Professional)**
+##### **Traditional Single-Company Deployment (Fallback)**
+```bash
+# Simple deployment for single ZZP (traditional approach)
+docker run -d --name zzp-admin \
+  -p 8080:8000 \
+  -e SITE_NAME=zzp-boekhouding.local \
+  -e ADMIN_PASSWORD=VeiligWachtwoord123 \
+  -e INSTALL_APPS=erpnext,nl_erpnext_rgs_mkb \
+  -v zzp-data:/home/frappe/frappe-bench/sites \
+  erjeve/nl-erpnext-rgs-mkb:latest
+
+# Note: Single-company setup limits household administration capabilities
+# Recommended to use household deployment above for dual-ZZP households
+```
+
+##### **Development Setup for FOSS Contribution**
 ```yaml
-# docker-compose.yml for service providers
+# docker-compose.yml for development and contribution
 version: '3.8'
 
 services:
-  dutch-erpnext:
-    image: erjeve/nl-erpnext-rgs-mkb:3.7.0
-    container_name: "${CLIENT_NAME}-erp"
+  dutch-erpnext-dev:
+    image: erjeve/nl-erpnext-rgs-mkb:dev
+    container_name: "zzp-development"
     
     environment:
-      - SITE_NAME=${CLIENT_DOMAIN}
-      - ADMIN_PASSWORD=${SECURE_PASSWORD}
-      - COMPANY_NAME=${CLIENT_COMPANY}
-      - ENTITY_TYPE=${LEGAL_FORM}  # ZZP/BV/EZ/SVC
+      - SITE_NAME=dev.zzp.local
+      - ADMIN_PASSWORD=DevPassword123
+      - INSTALL_APPS=erpnext,nl_erpnext_rgs_mkb
+      - DEVELOPER_MODE=1
       
     volumes:
-      - ${CLIENT_NAME}-data:/home/frappe/frappe-bench/sites
-      - ${CLIENT_NAME}-logs:/home/frappe/frappe-bench/logs
+      - /tmp/nl_erpnext_rgs_mkb:/home/frappe/frappe-bench/apps/nl_erpnext_rgs_mkb
+      - zzp-dev-data:/home/frappe/frappe-bench/sites
+      - zzp-dev-logs:/home/frappe/frappe-bench/logs
       
-    networks:
-      - ${CLIENT_NAME}-network
+    ports:
+      - "8080:8000"  # Development access
+      - "9000:9000"  # Debugging port
       
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${CLIENT_NAME}.rule=Host(`${CLIENT_DOMAIN}`)"
-      
-    # Professional deployment configuration
+    # Development configuration
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G  # Extra memory for development
         reservations:
-          memory: 1G
+          memory: 2G
 
 volumes:
-  ${CLIENT_NAME}-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /opt/clients/${CLIENT_NAME}/data
-      o: bind
+  zzp-dev-data:
+  zzp-dev-logs:
+
+# Usage: docker-compose up -d
+# - Editable volume mount for active development
+# - Quick rebuild and test cycles
+# - Easy contribution back to community
+```
 
 networks:
   ${CLIENT_NAME}-network:
@@ -1426,90 +1592,136 @@ docker run -d --name emergency-restore \
 # - Professional image ensures reliability
 ```
 
-### 🏪 **Market Distribution Channels**
+### � **FOSS Community Contribution**
 
-#### **Public Distribution (Docker Hub)**
+#### **Open Source Distribution**
 ```bash
-# Primary market reach through Docker Hub
-docker pull erjeve/nl-erpnext-rgs-mkb:latest
-docker pull erjeve/dutch-erpnext:latest
-docker pull erjeve/erpnext-mkb:latest
+# Personal project shared with community
+docker pull erjeve/nl-erpnext-rgs-mkb:personal
+git clone https://github.com/erjeve/nl_erpnext_rgs_mkb
 
-# Benefits:
-# ✅ Broad market reach and discoverability
-# ✅ Community adoption and feedback
-# ✅ Integration with existing Docker workflows
-# ✅ Free distribution for open-source impact
+# Benefits for Dutch ERPNext community:
+# ✅ Working example of RGS integration
+# ✅ Practical Docker setup for Dutch businesses
+# ✅ Open source contribution to ERPNext ecosystem
+# ✅ Documentation and lessons learned shared
 ```
 
-### 📊 **Business Model Transformation**
+### � **Personal Use Benefits & Community Impact**
 
-#### **Service Provider Benefits**
+#### **Household Accounting Benefits**
 ```
-Traditional Model (Per-Client Setup):
-├── ❌ Complex technical implementation per client
-├── ❌ Inconsistent deployments and configurations
-├── ❌ High technical overhead for basic compliance
-├── ❌ Client lock-in through technical complexity
-└── ❌ Limited scalability due to setup complexity
+Personal Requirements Met:
+├── ✅ Efficient ZZP administration for two businesses
+├── ✅ Dutch legal compliance without complexity
+├── ✅ Automated setup eliminates manual configuration
+├── ✅ Docker portability for backup/migration
+├── ✅ Integration with invoice2data for automation
+└── ✅ Long-term maintainable solution
 
-Distribution Model (Image-Based Service):
-├── ✅ Consistent deployments using standard image
-├── ✅ Focus on value-add services vs technical setup
-├── ✅ Rapid client onboarding (minutes vs weeks)
-├── ✅ Client migration freedom builds trust
-├── ✅ Horizontal scaling through standardization
-└── ✅ Professional image reduces support burden
-```
-
-#### **SME Market Impact**
-```
-Before Distribution:
-├── ❌ Complex technical barriers to ERPNext adoption
-├── ❌ Expensive custom implementations
-├── ❌ Vendor lock-in through proprietary setups
-├── ❌ Lengthy deployment and setup processes
-└── ❌ Inconsistent RGS compliance implementations
-
-After Distribution:
-├── ✅ Zero-configuration Dutch ERPNext deployment
-├── ✅ Commodity pricing through standardization
-├── ✅ Platform migration freedom
-├── ✅ Instant deployment capability
-├── ✅ Guaranteed RGS compliance out-of-the-box
-└── ✅ Professional reliability through tested images
+Development Benefits:
+├── ✅ Fast iteration cycles with Docker builds
+├── ✅ Clean separation of development and production
+├── ✅ Consistent environment across devices
+├── ✅ Easy backup and disaster recovery
+└── ✅ Good foundation for future enhancements
 ```
 
-### 🎯 **Success Metrics & KPIs**
-
-#### **Technical Performance**
+#### **FOSS Community Impact**
 ```
-Deployment Speed:
-├── Target: <30 seconds for complete Dutch ERPNext deployment
-├── Current: Achieved through build-time optimization
-├── Benchmark: 90% faster than traditional approach
-└── Measurement: Automated deployment testing
+Contributions to Community:
+├── ✅ Real-world Dutch ERPNext implementation example
+├── ✅ Solved RGS integration challenges documented
+├── ✅ Docker optimization techniques shared
+├── ✅ Build-time processing patterns demonstrated
+├── ✅ Translation integration example provided
+└── ✅ Household/SME use case template available
 
-Resource Efficiency:
-├── Memory: <2GB for complete solution (vs 4GB+ traditional)
-├── Storage: Optimized layers reduce download time
-├── CPU: Pre-processed fixtures eliminate runtime overhead
-└── Network: Delta updates for version management
+Technical Innovations Shared:
+├── ✅ Build-time fixture processing approach
+├── ✅ Three-document RGS integration pattern
+├── ✅ ERPNext customization best practices
+├── ✅ Docker optimization for personal deployment
+└── ✅ FOSS development workflow documentation
 ```
 
-#### **Market Adoption**
-```
-Distribution Metrics:
-├── Docker Hub pulls (public adoption tracking)
-├── GitHub stars and community engagement
-├── Service provider integration partnerships
-└── SME deployment success rate
+### 🎯 **Success Metrics for Household Project**
 
-Business Impact:
-├── Reduced deployment complexity (technical barrier removal)
-├── Increased ERPNext adoption in Dutch market
-├── Service provider efficiency improvements
-└── Client satisfaction through migration freedom
+#### **Household Administration Success**
+```
+Primary Goals Achievement:
+├── 📊 Dual-ZZP administration efficiency: Streamlined setup and operation
+├── 📋 Dutch legal compliance: Automated RGS integration for both entities
+├── 🏠 Household consolidation: Combined financial overview and planning
+├── 💳 Shared resource management: Proper allocation and cost tracking
+├── ⚖️ Cross-company workflows: Mutual service billing and offsetting
+├── 🎯 Tax preparation support: Household and individual entity reporting
+└── 🔄 Bank statement distribution: Automated classification and reconciliation
+
+Service Business Requirements:
+├── ⏰ Time tracking integration: Project-based service billing
+├── 👥 Client management: Separate relationships per ZZP
+├── 📈 Project profitability: Per-company and cross-company analysis
+├── 🤝 Collaboration tracking: Mutual service delivery workflows
+├── 💰 Resource optimization: Shared asset utilization efficiency
+└── 📊 Performance insights: Service business analytics and planning
+```
+
+#### **Technical Performance for Household Use**
+```
+Performance Targets:
+├── Deployment time: <2 minutes for complete household setup
+├── Memory usage: <3GB for dual-ZZP + Holdings configuration
+├── Storage efficiency: Optimized Docker layers for household needs
+├── Development cycles: Fast iteration with multi-company testing
+├── Reliability: Consistent performance across household workflows
+└── Data integrity: Accurate cross-company transactions and reporting
+
+Operational Benefits:
+├── 🚀 Quick setup: From zero to operational dual-ZZP in minutes
+├── 💾 Data portability: Docker-based backup and migration
+├── 🔄 Development agility: Fast testing and customization cycles
+├── 📱 Accessibility: Web-based access from any device
+├── 🛡️ Data security: Isolated household data with proper backups
+└── 📈 Scalability: Easy addition of new entities or family members
+```
+
+#### **FOSS Community Contribution Success**
+```
+Community Benefits:
+├── 🏠 Household administration example: Real-world dual-ZZP implementation
+├── 🏗️ Multi-company patterns: ERPNext configuration for shared resources
+├── 🇳🇱 Dutch localization: Service business focus with RGS compliance
+├── ⚙️ Technical solutions: Build-time optimization and Docker patterns
+├── 📚 Documentation: Complete setup and workflow documentation
+└── 🤝 Community support: Helping similar households solve same challenges
+
+Project Impact:
+├── GitHub repository with clear household use case documentation
+├── Working example for Dutch dual-ZZP households
+├── Service business focus (vs retail/manufacturing orientation)
+├── Multi-company ERPNext configuration templates
+├── Shared resource management patterns
+└── Integration with existing FOSS ecosystem (Frappe, invoice2data)
+```
+
+#### **Long-Term Household Goals**
+```
+Sustainability Objectives:
+├── 📊 Efficient household financial management and planning
+├── 🎯 Reduced administrative burden for both ZZP businesses
+├── 💰 Tax optimization through proper entity structure
+├── 📈 Business growth support with scalable administration
+├── 🔧 Maintainable solution that grows with household needs
+└── 🌐 Contribution to broader FOSS community ecosystem
+
+Evolution Potential:
+├── Additional family member ZZPs (children, relatives)
+├── Investment tracking and portfolio management
+├── International expansion (EU service delivery)
+├── Advanced automation (AI, machine learning integration)
+├── Community marketplace for household administration solutions
+└── Professional service provider ecosystem development
 ```
 
 ---
@@ -3581,46 +3793,55 @@ COPY --from=fixture-processor --chown=frappe:frappe \
 
 ---
 
-## 🎯 **UPDATED Technical Implementation Roadmap**
+## � **Personal Project Implementation Roadmap**
 
-**REVOLUTIONARY CHANGE:** The technical roadmap has been fundamentally transformed through build-time optimization and Docker distribution strategy. The focus has shifted from runtime processing challenges to distribution-ready production deployment.
+**FOCUSED SCOPE:** This roadmap reflects the actual project goal - creating a reliable RGS MKB solution for household ZZP accounting needs while contributing back to the FOSS community.
 
-### 📊 **Roadmap Evolution Assessment**
+### 📊 **Project Goals Assessment**
 
-#### **BEFORE: Traditional Development Phases (OUTDATED)**
+#### **Primary Goal: Household ZZP Accounting**
 ```
-❌ BOTTLENECKS IDENTIFIED:
-├── Phase 1: Runtime fixture loading (5-15 minutes)
-├── Phase 2: Memory overflow during site creation  
-├── Phase 3: Per-client custom implementations
-├── Phase 4: Manual performance tuning per deployment
-└── RESULT: Complex, slow, inconsistent deployments
-```
-
-#### **AFTER: Build-Time Optimization Strategy (REVOLUTIONARY)**
-```
-✅ PERFORMANCE BREAKTHROUGH:
-├── Build-Time: Heavy processing during Docker image creation
-├── Runtime: Instant deployment (10-30 seconds)
-├── Distribution: Generic images for entire Dutch market
-├── Scaling: Horizontal scaling through immutable infrastructure
-└── RESULT: Market-ready product vs technical implementation
+✅ REQUIREMENTS:
+├── Two ZZP administrations in one ERPNext instance
+├── Dutch RGS compliance for legal obligations
+├── Efficient Docker deployment for personal VPS
+├── Integration with invoice2data for automation
+├── Maintainable solution for long-term use
+└── RESULT: Practical accounting solution for personal use
 ```
 
-### 🚀 **Revised Implementation Phases**
+#### **Secondary Goal: FOSS Community Contribution**
+```
+✅ CONTRIBUTION GOALS:
+├── Share working Dutch ERPNext implementation
+├── Document RGS integration challenges and solutions
+├── Provide Docker optimization techniques
+├── Create reusable patterns for ERPNext customization
+├── Maintain open source best practices
+└── RESULT: Useful contribution to ERPNext ecosystem
+```
 
-#### **Phase 1: Build-Time Foundation (COMPLETED) ✅**
-**Achievement:** Build utilities and optimization infrastructure
+### � **Implementation Phases (Realistic Scope)**
+
+#### **Phase 1: Core RGS Integration (IN PROGRESS) 🔄**
+**Goal:** Get basic RGS MKB functionality working for ZZP use
 
 ```
-✅ COMPLETED:
-├── Build utilities module (nl_erpnext_rgs_mkb/build_utils.py)
-├── SQLite temporary site processing
-├── Three-document integration during build
-├── Docker multi-stage build architecture
-├── Pre-processed fixture generation
-├── Translation file generation (58,029 entries)
-└── Entity template creation (ZZP/BV/EZ/SVC)
+🔄 CURRENT WORK:
+├── RGS Classification DocType and basic functionality
+├── Custom fields integration with ERPNext Account
+├── Fixture loading optimization (avoiding memory issues)
+├── ZZP Chart of Accounts template creation
+├── Basic Docker build optimization
+└── Development workflow establishment
+
+🎯 NEXT STEPS:
+├── Complete fixture loading without memory overflow
+├── Test ZZP template creation and account setup
+├── Validate RGS compliance for basic scenarios
+├── Document development and deployment workflow
+└── Create working example for personal use
+```
 
 🎯 BREAKTHROUGH RESULT:
 - Runtime fixture loading eliminated
@@ -3632,46 +3853,63 @@ COPY --from=fixture-processor --chown=frappe:frappe \
 #### **Phase 2: Distribution Infrastructure (COMPLETED) ✅**
 **Achievement:** Market-ready Docker distribution strategy
 
-```
-✅ COMPLETED:
-├── Enhanced docker-bake.hcl with professional tagging
-├── Comprehensive container metadata and labels
-├── Multi-platform support (AMD64/ARM64)
-├── Professional distribution channels (Docker Hub)
-├── Platform migration and disaster recovery workflows
-├── Service provider deployment templates
-└── End-user one-command deployment
-
-🎯 MARKET TRANSFORMATION:
-- Generic Dutch ERPNext for entire SME market
-- Platform-agnostic deployment freedom
-- Service provider business model enablement
-- Zero-configuration RGS compliance
-```
-
-#### **Phase 3: Production Validation & Testing (CURRENT FOCUS) 🎯**
-**Goal:** Validate build-optimized deployment in production scenarios
+#### **Phase 2: Personal Production Setup (NEXT) 📋**
+**Goal:** Deploy working solution for household ZZP accounting
 
 ```
-🔄 IN PROGRESS:
-├── Build optimization validation
-├── Docker image creation testing  
-├── Multi-tenant deployment verification
-├── Performance benchmarking
-├── RGS compliance validation
-└── User acceptance testing
+📋 PLANNED WORK:
+├── Stable Docker build for personal use
+├── Two ZZP company setup and configuration  
+├── Chart of Accounts validation for Dutch compliance
+├── Invoice2data integration for automation
+├── Backup and disaster recovery procedures
+└── Documentation for personal maintenance
 
-📋 SUCCESS CRITERIA:
-- docker buildx bake nl-erpnext-rgs-mkb executes successfully
-- Site creation completes in <30 seconds
-- All 1,598 RGS classifications accessible
-- Dutch/English translations working
-- Entity templates (ZZP/BV/EZ/SVC) functional
+🎯 SUCCESS CRITERIA:
+- Reliable Docker deployment for household use
+- Two ZZP administrations working correctly
+- Dutch tax reporting requirements met
+- Integration with existing invoice processing
+- Maintainable solution for ongoing use
 ```
 
-#### **Phase 4: Market Distribution & Ecosystem (NEXT) 📈**
-**Goal:** Public distribution and ecosystem development
+#### **Phase 3: FOSS Community Contribution (FUTURE) �**
+**Goal:** Share working implementation with ERPNext community
 
+```
+� CONTRIBUTION GOALS:
+├── Clean up code and documentation
+├── Write technical blog posts about implementation
+├── Create tutorials for Dutch ERPNext users
+├── Submit upstream contributions where applicable
+├── Share Docker optimization techniques learned
+└── Provide working example for community
+
+🎯 SUCCESS CRITERIA:
+- Well-documented GitHub repository
+- Technical articles published
+- Community feedback incorporated
+- Upstream contributions made
+- Working example available for Dutch users
+```
+
+#### **Phase 4: Long-term Maintenance (ONGOING) 🔧**
+**Goal:** Keep solution current and maintainable
+
+```
+📋 MAINTENANCE TASKS:
+├── ERPNext version updates and compatibility
+├── RGS updates (3.7 → 3.8 transition)
+├── Docker base image updates
+├── Security patches and updates
+├── Personal workflow improvements
+└── Community support as time permits
+
+🎯 SUCCESS CRITERIA:
+- Solution remains current with ERPNext updates
+- RGS compliance maintained through changes
+- Personal accounting needs continue to be met
+- Community benefits from shared improvements
 ```
 📅 PLANNED:
 ├── Docker Hub public distribution
