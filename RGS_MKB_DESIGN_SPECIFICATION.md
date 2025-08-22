@@ -129,6 +129,8 @@ rgsmkb_all4EN.json
 1. **Frappe Framework Expertise** (Version 15+)
    - DocType creation and relationships
    - Custom field integration
+   - **CRITICAL**: Frappe's built-in caching system (`@redis_cache`, `get_cached_doc`)
+   - **CRITICAL**: Frappe's translation management (`frappe._`, `__`, CSV translations)
    - Fixture loading and optimization
    - Tree DocType hierarchies
    - Modern framework patterns 
@@ -178,11 +180,15 @@ cat RGS_MKB_DESIGN_SPECIFICATION.md  # CRITICAL - contains all context
 head -50 /rgs_data/attributes.csv     # Official field mappings
 head -20 /rgs_data/rgsmkb_all4EN.json # Sample RGS data
 
-# 4. Frappe app setup (if using bench)
+# 4. Examine official translations (58,029 entries)
+head -20 /tmp/nl_erpnext_rgs_mkb/20210913\ RGS\ NL\ en\ EN\ labels.csv
+wc -l /tmp/nl_erpnext_rgs_mkb/20210913\ RGS\ NL\ en\ EN\ labels.csv
+
+# 5. Frappe app setup (if using bench)
 bench get-app https://github.com/erjeve/nl_erpnext_rgs_mkb.git
 bench install-app nl_erpnext_rgs_mkb --site your-site
 
-# 5. Docker setup (production-style)
+# 6. Docker setup (production-style)
 # Add to apps.json in frappe_docker
 # Build with: docker buildx bake custom --set custom.args.APPS_JSON_BASE64=$(base64 -w 0 apps.json)
 ```
@@ -217,23 +223,84 @@ doctype_definition = {
 
 #### 2. Performance Optimization Patterns
 ```python
-# Large fixture loading with Redis optimization
-def optimize_for_large_datasets():
+# ✅ CORRECT: Use Frappe's built-in caching capabilities
+from frappe.utils.caching import redis_cache
+
+@redis_cache(ttl=86400)  # Auto-managed cache with 24-hour TTL
+def get_rgs_hierarchy(parent_code=None, entity_type=None):
     """
-    CRITICAL: 5,000+ RGS records require special handling
+    Get RGS hierarchy with automatic Frappe caching
+    No manual Redis management needed
     """
-    import frappe
+    filters = {}
+    if parent_code:
+        filters["parent_rgs_classification"] = parent_code
+    if entity_type:
+        filters[f"rgs_{entity_type.lower()}"] = ["!=", "N"]
     
-    # Pre-warm Redis cache
-    redis_client = frappe.cache()
-    redis_client.config_set('maxmemory-policy', 'allkeys-lru')
-    
-    # Batch processing (max 500 records per batch)
+    return frappe.get_all("RGS Classification",
+                         filters=filters,
+                         fields=["rgs_code", "rgs_omskort", "rgs_reknr"],
+                         order_by="rgs_sortering")
+
+# ✅ CORRECT: Use cached documents for frequent lookups
+def get_rgs_classification(rgs_code):
+    """Frappe automatically handles cache invalidation"""
+    return frappe.get_cached_doc("RGS Classification", rgs_code)
+
+# ✅ LEVERAGE: Official RGS translations (58,029 entries)
+def get_translated_account_name(rgs_doc):
+    """Use official Dutch/English translations from CSV"""
+    return frappe._(rgs_doc.rgs_omskort)  # Auto-translates based on user language
+
+# ✅ CORRECT: Batch processing with Frappe patterns
+def import_rgs_fixtures_optimized():
+    """Use Frappe's bulk operations instead of manual Redis management"""
     batch_size = 500
     
-    # Clear cache periodically during import
-    if record_count % 2000 == 0:
-        frappe.clear_cache()
+    # Load official translations first
+    setup_rgs_translations()
+    
+    # Use Frappe's bulk insert capabilities
+    frappe.db.bulk_insert("RGS Classification", 
+                          fields=field_list,
+                          values=batch_values)
+```
+
+#### 3. Translation Management Integration
+```python
+# ✅ CRITICAL: Integrate 58,029 official RGS NL↔EN translations
+def setup_rgs_translations():
+    """
+    Convert /tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv
+    to Frappe translation format (translations/nl.csv, translations/en.csv)
+    """
+    import csv
+    
+    # Load official RGS translations
+    with open('/tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv') as f:
+        reader = csv.DictReader(f)
+        
+        nl_translations = {}
+        en_translations = {}
+        
+        for row in reader:
+            omschrijving = row['Omschrijving RGS']  # Dutch
+            en_label = row['EN Label']              # English
+            
+            if omschrijving and en_label:
+                # Map English to Dutch for Dutch users
+                nl_translations[en_label] = omschrijving
+                # Map Dutch to English for English users  
+                en_translations[omschrijving] = en_label
+    
+    # Save in Frappe translation format
+    save_frappe_translations('nl', nl_translations)
+    save_frappe_translations('en', en_translations)
+
+# ✅ USE: Standard Frappe translation methods
+# Python: frappe._("Account Number")
+# JavaScript: __("RGS Classification")
 ```
 
 #### 3. Legal Compliance Validation
@@ -269,7 +336,29 @@ naming_rule: "rgsReknr"  # Wrong - this is for user interface only
 parent_rgs_classification: rgs_reknr  # Wrong - use rgsCode for hierarchy
 ```
 
-#### 3. **WRONG: Ignoring performance optimization**
+#### 3. **WRONG: Manual Redis optimization instead of Frappe caching**
+```python
+# DON'T DO THIS - unnecessarily complex
+redis_client = frappe.cache()
+redis_client.config_set('maxmemory-policy', 'allkeys-lru')
+redis_client.setex("custom_cache", 86400, data)
+
+# DO THIS INSTEAD - use Frappe's @redis_cache decorator
+@redis_cache(ttl=86400)
+def get_cached_data():
+    return expensive_operation()
+```
+
+#### 4. **WRONG: Ignoring official RGS translations**
+```python
+# DON'T DO THIS - missing 58,029 official translations
+account_name = rgs_doc.rgs_omskort  # Always Dutch
+
+# DO THIS INSTEAD - leverage official NL↔EN translations
+account_name = frappe._(rgs_doc.rgs_omskort)  # Auto-translates
+```
+
+#### 5. **WRONG: Ignoring performance optimization**
 ```python
 # DON'T DO THIS - will cause memory overflow
 for record in all_1598_rgs_records:
@@ -532,16 +621,167 @@ rm -rf volumes/         # Clean persistent data
 
 ### Performance Optimization
 
-#### Redis Cache Management for Large Fixtures
+#### Frappe-Native Caching (Recommended Approach)
 ```python
-# Performance optimization for large RGS datasets
+# ✅ FRAPPE-NATIVE: Use built-in caching capabilities
+from frappe.utils.caching import redis_cache
 import frappe
-import redis
 
-def optimize_rgs_fixture_loading():
+@redis_cache(ttl=86400)  # Cache for 24 hours, auto-managed
+def get_rgs_hierarchy(parent_code=None, entity_type=None):
     """
-    Active Redis cache tweaking for large RGS fixtures
-    Especially important for 5,000+ RGS classification records
+    Get RGS hierarchy with automatic Frappe caching
+    Uses built-in cache invalidation and multi-tenancy
+    """
+    filters = {}
+    if parent_code:
+        filters["parent_rgs_classification"] = parent_code
+    if entity_type:
+        filters[f"rgs_{entity_type.lower()}"] = ["!=", "N"]
+    
+    return frappe.get_all("RGS Classification",
+                         filters=filters,
+                         fields=["rgs_code", "rgs_omskort", "rgs_reknr", "is_group"],
+                         order_by="rgs_sortering")
+
+@redis_cache(ttl=3600)  # Cache for 1 hour
+def get_rgs_templates_by_entity(entity_type):
+    """Cache RGS templates per entity type"""
+    return frappe.get_all("RGS Classification",
+                         filters={f"rgs_{entity_type.lower()}": ["in", ["J", "P"]]},
+                         fields=["rgs_code", "rgs_omskort", "rgs_reknr"])
+
+def get_cached_rgs_classification(rgs_code):
+    """
+    Use Frappe's cached documents for frequent RGS lookups
+    Automatically handles cache invalidation on document changes
+    """
+    return frappe.get_cached_doc("RGS Classification", rgs_code)
+
+# ✅ FIXTURE LOADING: Optimized with Frappe patterns
+@frappe.whitelist()
+def import_rgs_fixtures_optimized():
+    """
+    Enhanced fixture import using Frappe best practices
+    No manual Redis management needed
+    """
+    # Pre-load translations for efficiency
+    setup_rgs_translations()
+    
+    # Use Frappe's bulk insert capabilities
+    batch_size = 500
+    fixture_path = frappe.get_app_path('nl_erpnext_rgs_mkb', 
+                                       'fixtures/rgs_classification.json')
+    
+    with open(fixture_path) as f:
+        data = json.load(f)
+    
+    # Process in batches with Frappe transaction management
+    for i in range(0, len(data), batch_size):
+        batch = data[i:i+batch_size]
+        
+        # Use Frappe's bulk operations
+        frappe.db.bulk_insert("RGS Classification", 
+                              fields=list(batch[0].keys()),
+                              values=[list(doc.values()) for doc in batch])
+        
+        # Commit each batch
+        frappe.db.commit()
+        
+        # Clear cache periodically (Frappe-managed)
+        if i % 2000 == 0:
+            frappe.clear_cache()
+            
+    # Invalidate specific caches after import
+    get_rgs_hierarchy.clear_cache()
+    get_rgs_templates_by_entity.clear_cache()
+    
+    return len(data)
+```
+
+#### Official RGS Translation Integration
+```python
+# ✅ FRAPPE TRANSLATIONS: Integrate 58,029 official RGS translations
+def setup_rgs_translations():
+    """
+    Convert official RGS NL↔EN translations to Frappe format
+    Uses /tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv
+    """
+    import csv
+    import os
+    
+    # Load official RGS translations (58,029 entries)
+    csv_path = '/tmp/nl_erpnext_rgs_mkb/20210913 RGS NL en EN labels.csv'
+    
+    nl_translations = {}
+    en_translations = {}
+    
+    with open(csv_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        
+        for row in reader:
+            rgs_code = row['RGS code']
+            omschrijving = row['Omschrijving RGS']  # Dutch description
+            nl_label = row['NL Label']
+            en_label = row['EN Label']
+            nl_terse = row['NL Terse label']
+            en_terse = row['EN terse label']
+            
+            # Build translation mappings
+            if omschrijving and en_label:
+                nl_translations[en_label] = omschrijving
+            if nl_terse and en_terse:
+                en_translations[nl_terse] = en_terse
+                
+            # Add RGS-specific context translations
+            if rgs_code and omschrijving:
+                # Context-aware translations with RGS code prefix
+                context_key = f"rgs_{rgs_code.lower()}_{omschrijving.lower().replace(' ', '_')}"
+                if en_label:
+                    nl_translations[context_key] = omschrijving
+    
+    # Generate Frappe translation files
+    save_frappe_translations('nl', nl_translations)
+    save_frappe_translations('en', en_translations)
+    
+    frappe.msgprint(f"Generated {len(nl_translations)} Dutch and {len(en_translations)} English translations")
+
+def save_frappe_translations(language_code, translations):
+    """Save translations in Frappe's expected format"""
+    app_path = frappe.get_app_path('nl_erpnext_rgs_mkb')
+    translations_dir = os.path.join(app_path, 'translations')
+    
+    if not os.path.exists(translations_dir):
+        os.makedirs(translations_dir)
+    
+    translations_file = os.path.join(translations_dir, f'{language_code}.csv')
+    
+    with open(translations_file, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f)
+        for source, translation in translations.items():
+            writer.writerow([source, translation])
+
+# ✅ USE IN CODE: Standard Frappe translation methods
+def get_translated_account_name(rgs_classification):
+    """Get account name with automatic translation based on user preference"""
+    # This automatically translates based on user's language setting
+    return frappe._(rgs_classification.rgs_omskort)
+
+def get_translated_rgs_description(rgs_code, description):
+    """Get RGS description with context-aware translation"""
+    context_key = f"rgs_{rgs_code.lower()}_{description.lower().replace(' ', '_')}"
+    return frappe._(context_key, description)  # Fallback to original if no translation
+```
+
+#### Legacy Redis Optimization (For Reference Only)
+```python
+# ❌ LEGACY APPROACH: Manual Redis management (not recommended)
+# This approach is overly complex and ignores Frappe's built-in capabilities
+
+def optimize_rgs_fixture_loading_legacy():
+    """
+    DEPRECATED: Manual Redis cache tweaking
+    Use Frappe's @redis_cache decorator instead
     """
     # Get Redis connection
     redis_client = frappe.cache()
@@ -562,11 +802,11 @@ def optimize_rgs_fixture_loading():
     
     return True
 
-# Usage during fixture loading
+# ❌ LEGACY: Enhanced fixture import with manual Redis optimization
 @frappe.whitelist()
-def import_large_rgs_fixtures():
-    """Enhanced fixture import with Redis optimization"""
-    optimize_rgs_fixture_loading()
+def import_large_rgs_fixtures_legacy():
+    """DEPRECATED: Use import_rgs_fixtures_optimized() instead"""
+    optimize_rgs_fixture_loading_legacy()
     
     # Import in batches to prevent memory overflow
     batch_size = 500
@@ -583,6 +823,7 @@ def import_large_rgs_fixtures():
         # Clear cache periodically
         if i % 2000 == 0:
             frappe.clear_cache()
+```
 ```
 
 #### Docker Performance Tuning
