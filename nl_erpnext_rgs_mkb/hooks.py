@@ -22,11 +22,11 @@ doc_events = {
 # Boot session
 boot_session = "nl_erpnext_rgs_mkb.utils.boot_session"
 
-# Fixtures - Temporarily completely disabled for migration
-# fixtures = [
-#     "Custom Field"
-#     # {
-#     #     "doctype": "RGS Classification", 
-#     #     "filters": {"rgs_status": "A"}
-#     # }
-# ]
+# Fixtures - Re-enabled with corrected RGS Classification data
+fixtures = [
+    "Custom Field",
+    {
+        "doctype": "RGS Classification", 
+        "filters": {"rgs_status": "A"}
+    }
+]
