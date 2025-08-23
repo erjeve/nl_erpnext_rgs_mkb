@@ -15,37 +15,34 @@ Based on reverse engineering ERPNext's Chart of Accounts loading:
 
 **New Strategy**: Abandon fixture approach, adopt ERPNext's proven pattern.
 
-### 🚨 FIRST: Restore Enhanced Data
-**Critical**: The enhanced data file is empty and needs restoration:
+### � STEP 1: Deploy Enhanced Implementation
+**Proper GitHub-based workflow** (recommended):
 
 ```bash
-# 1. Restore enhanced data from GitHub
-cd /tmp/nl_erpnext_rgs_mkb
-git pull origin main  # Get latest enhanced implementation
-
-# 2. Verify data file is restored (should be ~2MB, not 0 bytes)
-ls -la CORRECTED_RGS_Classification.json
-
-# 3. Copy enhanced data to container
+# 1. Copy enhanced implementation from local development
 cd /opt/frappe_docker
-docker cp /tmp/nl_erpnext_rgs_mkb/CORRECTED_RGS_Classification.json frappe_docker-backend-1:/tmp/
+docker cp /home/ict/nl_erpnext_rgs_mkb/. frappe_docker-backend-1:/workspace/frappe-bench/apps/nl_erpnext_rgs_mkb/
+
+# 2. Alternative: Clone fresh from GitHub (if needed)
+# docker exec frappe_docker-backend-1 bash -c "cd /workspace/frappe-bench/apps && rm -rf nl_erpnext_rgs_mkb && git clone https://github.com/erjeve/nl_erpnext_rgs_mkb.git"
 ```
 
-### 1. Execute ERPNext-Pattern Tree Import ⚡
+### 2. Execute ERPNext-Pattern Tree Import ⚡
 **NEW APPROACH**: Use ERPNext's proven tree creation pattern:
 
 ```bash
 # 1. Remove existing fixture (causes problems)
 docker exec frappe_docker-backend-1 bash -c "cd /home/frappe/frappe-bench && mv apps/nl_erpnext_rgs_mkb/nl_erpnext_rgs_mkb/fixtures/rgs_classification.json apps/nl_erpnext_rgs_mkb/nl_erpnext_rgs_mkb/fixtures/rgs_classification.json.disabled"
 
-# 2. Create ERPNext-pattern import script
-# (Script will use ignore_update_nsm flags + rebuild_tree like ERPNext CoA)
+# 2. ERPNext-pattern import script is now included in the app
+# (Script uses ignore_update_nsm flags + rebuild_tree like ERPNext CoA)
 
 # 3. Execute programmatic import
+docker exec frappe_docker-backend-1 bash -c "cd /home/frappe/frappe-bench && bench --site frappe.fivi.eu execute 'exec(open(\"apps/nl_erpnext_rgs_mkb/import_rgs_erpnext_pattern.py\").read())'"
 docker exec frappe_docker-backend-1 bash -c "cd /home/frappe/frappe-bench && bench --site frappe.fivi.eu execute 'exec(open(\"/tmp/import_rgs_erpnext_pattern.py\").read())'"
 ```
 
-### 2. Validate the Results 📊
+### 3. Validate the Results 📊
 After successful import, verify:
 
 ```bash
@@ -56,7 +53,7 @@ docker exec frappe_docker-backend-1 bash -c "cd /home/frappe/frappe-bench && ben
 # Navigate to: http://localhost:8080/app/rgs-classification/view/tree
 ```
 
-### 3. Alternative: Migration Patch Approach 🔧
+### 4. Alternative: Migration Patch Approach 🔧
 If direct execution fails, create a proper migration:
 
 ```bash
@@ -68,18 +65,18 @@ mkdir -p /tmp/nl_erpnext_rgs_mkb/nl_erpnext_rgs_mkb/patches/v1_0/
 
 ## Key Files Ready for Use
 
-- **Enhanced Data**: `/tmp/nl_erpnext_rgs_mkb/CORRECTED_RGS_Classification.json` ⚠️ **NEEDS RESTORATION** (currently 0 bytes)
-- **Import Script**: `/tmp/import_rgs_tree.py` ✅ **READY IN CONTAINER** (4,219 bytes)
-- **GitHub Repo**: https://github.com/erjeve/nl_erpnext_rgs_mkb ✅ **ENHANCED IMPLEMENTATION**
+- **Enhanced Implementation**: `/home/ict/nl_erpnext_rgs_mkb/` ✅ **LOCAL DEVELOPMENT** (with confidential data)
+- **Import Script**: `import_rgs_erpnext_pattern.py` ✅ **INCLUDED IN APP**
+- **GitHub Repo**: https://github.com/erjeve/nl_erpnext_rgs_mkb ✅ **PUSHED TO GITHUB**
 
 ## Pre-Flight Checklist
 
 Before executing the import:
 
-- [ ] **Restore enhanced data**: `git pull origin main` in `/tmp/nl_erpnext_rgs_mkb/`
-- [ ] **Verify data size**: `CORRECTED_RGS_Classification.json` should be ~2MB, not 0 bytes  
-- [ ] **Copy to container**: Enhanced data transferred to `/tmp/` in container
-- [ ] **Import script ready**: `/tmp/import_rgs_tree.py` exists in container (✅ confirmed)
+- [x] **Enhanced implementation ready**: Local development at `/home/ict/nl_erpnext_rgs_mkb/`
+- [x] **Code committed and pushed**: All changes in GitHub repository  
+- [ ] **Copy to container**: Enhanced implementation transferred to container
+- [x] **Import script included**: `import_rgs_erpnext_pattern.py` in app root
 - [ ] **App installed**: `nl_erpnext_rgs_mkb` app successfully installed
 
 ## Success Indicators
