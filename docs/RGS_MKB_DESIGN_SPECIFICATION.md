@@ -165,6 +165,56 @@ is_rgs_compliant: bool      # Compliance flag
 - Balance requirement enforcement
 - Account type consistency checks
 
+### 3.4 Dutch Tax Integration Research 📋 
+
+**Phase 3 Development Priority:**
+
+The integration of Dutch tax rates with RGS classifications requires comprehensive research into ERPNext's tax system architecture:
+
+**Key Research Areas:**
+
+1. **Tax Rate Field Integration:**
+   ```python
+   # ERPNext CoA Template supports tax_rate field
+   "account_name": "BTW 21% Inkoop",
+   "account_number": "1405", 
+   "account_type": "Tax",
+   "tax_rate": 21.0  # Automatic Dutch VAT rate assignment
+   ```
+
+2. **ERPNext Tax DocTypes Integration:**
+   - **Tax Category**: Link RGS account types to tax categories (Standard, Zero-Rated, Exempt)
+   - **Tax Rule**: Define automatic tax selection based on RGS classification
+   - **Tax Template**: Create Dutch-specific VAT templates (21%, 9%, 0%)
+
+3. **Dutch VAT Classification Mapping:**
+   ```python
+   RGS_TAX_MAPPING = {
+       'verkopen_algemeen': {'tax_rate': 21.0, 'tax_category': 'Standard'},
+       'verkopen_laag_tarief': {'tax_rate': 9.0, 'tax_category': 'Reduced'}, 
+       'verkopen_vrijgesteld': {'tax_rate': 0.0, 'tax_category': 'Zero-Rated'},
+       'export_eu': {'tax_rate': 0.0, 'tax_category': 'EU-Export'},
+       'inkoop_aftrekbaar': {'tax_rate': 21.0, 'tax_category': 'Deductible'}
+   }
+   ```
+
+4. **Automatic Tax Assignment Logic:**
+   - RGS code pattern recognition for tax classification
+   - Integration with ERPNext's transaction tax calculation
+   - Dutch BTW reporting compatibility
+
+**Implementation Approach:**
+- Extend Account DocType with Dutch tax metadata
+- Create RGS-aware tax rule engine
+- Implement BTW reporting templates
+- Integrate with Dutch tax authority requirements (Belastingdienst)
+
+**Dependencies:**
+- Research ERPNext tax calculation workflow
+- Map Dutch tax regulations to ERPNext tax system
+- Design RGS-to-tax-rule conversion logic
+- Create Dutch VAT reporting framework
+
 ## 4. Intelligent Mapping Engine
 
 ### 4.1 Multi-Factor Classification Algorithm
@@ -440,6 +490,11 @@ frm.page.add_inner_button(__('P&L'), function() {
 - Performance optimization and caching
 
 ### 10.3 Phase 3 Planned 📋
+- **Dutch Tax Integration Research**: Investigate `tax_rate` field integration with ERPNext tax system
+  - Map RGS classifications to appropriate Dutch VAT rates (21%, 9%, 0%)
+  - Research relationships with `Tax Category`, `Tax Rule`, and `Tax Template` DocTypes
+  - Design automatic tax assignment based on RGS account classification
+  - Implement Dutch-specific tax compliance features (BTW reporting)
 - RGS 3.8+ compatibility preparation
 - API integration for real-time RGS updates
 - Advanced analytics and compliance reporting
