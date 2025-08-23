@@ -2,19 +2,16 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils.nestedset import NestedSet
+from frappe.model.document import Document
 
-class RGSClassification(NestedSet):
+class RGSClassification(Document):
     """RGS Classification Tree for Dutch Chart of Accounts compliance"""
-    
-    nsm_parent_field = 'parent_rgs_classification'
     
     def validate(self):
         """Validate RGS Classification entry"""
         self.validate_rgs_code()
         self.validate_nivo()
         self.set_parent_based_on_code()
-        super().validate()
         
     def validate_rgs_code(self):
         """Validate RGS code format"""

@@ -22,11 +22,7 @@ doc_events = {
 # Boot session
 boot_session = "nl_erpnext_rgs_mkb.utils.boot_session"
 
-# Fixtures - Re-enabled with corrected RGS Classification data
+# Fixtures - Only configuration items, not master data
 fixtures = [
-    "Custom Field",
-    {
-        "doctype": "RGS Classification", 
-        "filters": {"rgs_status": "A"}
-    }
+    "Custom Field"
 ]
